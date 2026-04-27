@@ -1,0 +1,37 @@
+# Functions
+# ---------
+
+test_cmd() { command -v "$1" >/dev/null; }
+
+push_dir() {
+  local dir="$1"
+  local var="${2:-PATH}"
+  [[ -d $dir ]] && eval "export $var=\"$dir\${$var:+:\$$var}\""
+}
+
+# PATH
+# ----
+
+test_cmd ccache && push_dir /usr/lib/ccache/bin
+push_dir "$HOME/.cargo/bin"
+push_dir "$HOME/.local/bin"
+push_dir "$HOME/.opencode/bin"
+push_dir "$HOME/.yarn/bin"
+push_dir "$HOME/node_modules/.bin"
+
+# Env Vars
+# --------
+
+push_dir "$HOME/.local/share/man" MANPATH
+
+# Neovim
+# ------
+
+test_cmd nvim && export EDITOR=nvim
+
+# ---
+
+# shellcheck disable=SC1090
+[[ -f ~/.bashrc ]] && . ~/.bashrc
+
+# vim: ft=bash

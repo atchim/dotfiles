@@ -1,0 +1,55 @@
+default_install_hook_types:
+  - pre-commit
+  - commit-msg
+repos:
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - &shellcheck-base
+        id: shellcheck
+        name: ShellCheck
+        entry: shellcheck
+        language: system
+        types: [shell]
+      - <<: *shellcheck-base
+        name: ShellCheck (Bash config files)
+        args: ["--shell=bash"]
+        files: ^dot_bash(rc|_profile)$
+        types: []
+  - repo: local
+    hooks:
+      - &shellharden-base
+        id: shellharden
+        name: Shellharden
+        entry: shellharden
+        args: ["--check"]
+        language: system
+        types: [shell]
+      - <<: *shellharden-base
+        name: Shellharden (Bash config files)
+        files: ^dot_bash(rc|_profile)$
+        types: []
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.13.1-1
+    hooks:
+      - id: shfmt
+      - id: shfmt
+        name: shfmt (Bash config files)
+        files: ^dot_bash(rc|_profile)$
+        types: []

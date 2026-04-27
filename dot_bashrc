@@ -1,0 +1,17 @@
+[[ $- != *i* ]] && return
+
+# Functions
+# ---------
+
+test_cmd() { command -v "$1" >/dev/null; }
+
+# Aliases
+# -------
+
+test_cmd nvim && alias vi=nvim
+
+# ---
+
+test_cmd starship && eval "$(starship init bash)"
+
+# vim: ft=bash
