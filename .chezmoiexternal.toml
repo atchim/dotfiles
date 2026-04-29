@@ -1,0 +1,4 @@
+[".local/share/oil8"]
+type = "git-repo"
+url = "https://github.com/atchim/oil8.git"
+refreshPeriod = "168h"
