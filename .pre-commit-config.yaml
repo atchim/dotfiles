@@ -37,13 +37,18 @@ repos:
       - id: prettier
         additional_dependencies:
           - prettier@3.8.3
-          - prettier-plugin-toml@2.0.1
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.12
     hooks:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format
+      - id: taplo-lint
+        args: [--no-schema]
   - repo: local
     hooks:
       - &shellcheck-base
