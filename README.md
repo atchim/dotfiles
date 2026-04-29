@@ -6,6 +6,7 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io).
 
 - **Bash** — `~/.bash_profile`, `~/.bashrc`
 - **Alacritty** — `~/.config/alacritty/alacritty.toml`
+- **tmux** — `~/.config/tmux/tmux.conf`
 
 ## Prerequisites
 
@@ -25,6 +26,8 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io).
 - [fish](https://fishshell.com)
 - [Neovim](https://neovim.io)
 - [Starship](https://starship.rs)
+- [tmux](https://github.com/tmux/tmux) with
+  [xclip](https://github.com/astrand/xclip)
 
 ## Installation
 
