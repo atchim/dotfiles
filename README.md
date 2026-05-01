@@ -9,6 +9,7 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io).
 - **Fish** — `~/.config/fish/`
 - **qutebrowser** — `~/.config/qutebrowser/`
 - **tmux** — `~/.config/tmux/tmux.conf`
+- **XDG user dirs** — `~/.config/user-dirs.dirs`
 
 ## Prerequisites
 
