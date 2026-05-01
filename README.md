@@ -6,6 +6,7 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io).
 
 - **Bash** — `~/.bash_profile`, `~/.bashrc`
 - **Alacritty** — `~/.config/alacritty/alacritty.toml`
+- **qutebrowser** — `~/.config/qutebrowser/`
 - **tmux** — `~/.config/tmux/tmux.conf`
 
 ## Prerequisites
@@ -25,6 +26,7 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io).
 - [ccache](https://ccache.dev)
 - [fish](https://fishshell.com)
 - [Neovim](https://neovim.io)
+- [qutebrowser](https://qutebrowser.org)
 - [Starship](https://starship.rs)
 - [tmux](https://github.com/tmux/tmux) with
   [xclip](https://github.com/astrand/xclip)
