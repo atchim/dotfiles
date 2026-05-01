@@ -20,3 +20,6 @@ indent_style = tab
 
 [*.fish]
 indent_size = 4
+
+[*.toml.snap]
+max_line_length = unset

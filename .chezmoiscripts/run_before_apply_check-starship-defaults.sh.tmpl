@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+set -eu
+
+snapshot='{{ .chezmoi.sourceDir }}/dot_config/starship-defaults.toml.snap'
+
+if ! command -v starship >/dev/null 2>&1; then
+  printf 'warning: starship not installed; skipping defaults drift check\n' >&2
+  exit 0
+fi
+
+if [ ! -f "$snapshot" ]; then
+  printf 'warning: starship defaults snapshot missing at %s\n' "$snapshot" >&2
+  exit 0
+fi
+
+current=$(mktemp)
+trap 'rm -f "$current"' EXIT
+starship print-config -d >"$current"
+
+if ! diff -u "$snapshot" "$current" >/dev/null 2>&1; then
+  printf 'warning: starship defaults drifted from snapshot:\n' >&2
+  diff -u "$snapshot" "$current" >&2 || true
+  printf '\nrefresh: starship print-config -d > %s\n' "$snapshot" >&2
+fi
+
+exit 0

@@ -8,6 +8,7 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io).
 - **Alacritty** — `~/.config/alacritty/alacritty.toml`
 - **Fish** — `~/.config/fish/`
 - **qutebrowser** — `~/.config/qutebrowser/`
+- **Starship** — `~/.config/starship.toml`
 - **tmux** — `~/.config/tmux/tmux.conf`
 - **XDG user dirs** — `~/.config/user-dirs.dirs`
 
