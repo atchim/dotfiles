@@ -6,6 +6,7 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io).
 
 - **Bash** — `~/.bash_profile`, `~/.bashrc`
 - **Alacritty** — `~/.config/alacritty/alacritty.toml`
+- **Fish** — `~/.config/fish/`
 - **qutebrowser** — `~/.config/qutebrowser/`
 - **tmux** — `~/.config/tmux/tmux.conf`
 

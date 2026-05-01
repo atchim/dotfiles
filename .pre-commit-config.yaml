@@ -73,6 +73,16 @@ repos:
         name: Shellharden (Bash config files)
         files: ^dot_bash(rc|_profile)$
         types: []
+      - id: fish-indent
+        name: fish_indent
+        entry: fish_indent --check
+        language: system
+        types: [fish]
+      - id: fish-syntax
+        name: fish -n
+        entry: fish -n
+        language: system
+        types: [fish]
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.22.1
     hooks:

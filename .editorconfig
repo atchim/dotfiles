@@ -17,3 +17,6 @@ switch_case_indent = true
 
 [Makefile]
 indent_style = tab
+
+[*.fish]
+indent_size = 4
