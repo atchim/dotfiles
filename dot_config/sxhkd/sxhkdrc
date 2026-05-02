@@ -1,0 +1,35 @@
+# General (non-bspwm) bindings. Loaded alongside bspwm.sxhkdrc by the bspwm
+# autostart. WM-related window/monitor ops live in bspwm.sxhkdrc under the
+# `super + w` leader; rofi-window has moved there as `super + w ; w`.
+
+# Switch keyboard layout to pt-BR (ABNT2).
+super + space ; k ; b
+  setxkbmap -model abnt2 -layout br \
+  && notify-send --urgency=low "Changed keyboard layout to pt-BR"
+
+# Switch keyboard layout to en-US.
+super + space ; k ; u
+  setxkbmap -layout us \
+  && notify-send --urgency=low "Changed keyboard layout to en-US"
+
+# Open a new terminal window (reusing an existing alacritty daemon if any).
+super + Return
+  alacritty msg create-window || alacritty
+
+# Open alsamixer in a popup-class terminal.
+super + space ; m
+  alacritty msg create-window --class popup -e alsamixer -g \
+    || alacritty --class popup -e alsamixer -g
+
+# Open htop in a popup-class terminal.
+super + space ; t
+  alacritty msg create-window --class popup -e htop \
+    || alacritty --class popup -e htop
+
+# Open the rofi run launcher.
+super + space ; space
+  rofi -modi run -show run -theme dmenu
+
+# Reload sxhkd's configuration in place.
+super + r ; s
+  pkill -USR1 --exact sxhkd

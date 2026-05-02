@@ -1,0 +1,6 @@
+#!/bin/sh
+# srandrd callback. srandrd execs us once per X RANDR output event; we don't
+# dispatch on event type because `bspwm-monitor reconcile` reads the live
+# state and figures out the right action regardless of which event fired.
+
+exec bspwm-monitor reconcile

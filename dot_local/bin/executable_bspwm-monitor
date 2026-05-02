@@ -1,0 +1,155 @@
+#!/bin/sh
+# bspwm-monitor — reconcile bspwm + xrandr to the live monitor topology.
+#
+# Subcommands (all idempotent; default is `reconcile`):
+#   reconcile  Detect current state and apply the correct dual/single layout.
+#   init       Alias for `reconcile`; called from bspwmrc autostart.
+#   attach     Alias for `reconcile`; called from a hotplug event.
+#   detach     Alias for `reconcile`; called from a hotplug event.
+#
+# Topology rules:
+#   - The laptop output is `eDP`.
+#   - The external is the first non-eDP `connected` output in `xrandr -q`.
+#   - When external is present: external is primary, eDP --left-of external.
+#     Each monitor owns 10 desktops; the external's are suffixed `.2` so
+#     bspwm's globally-unique-name constraint is satisfied. Initial focus
+#     lands on external slot 1 (`tty.2`).
+#   - When external is absent: any leftover non-laptop bspwm monitor has
+#     its windows merged onto the laptop by slot index (external slot N's
+#     windows move to laptop slot N), then it is removed.
+
+set -eu
+
+readonly LAPTOP='eDP'
+
+# Print the first connected non-laptop output from xrandr, or empty.
+external_output() {
+  xrandr -q | awk -v laptop="$LAPTOP" '
+    $2 == "connected" && $1 != laptop { print $1; exit }
+  '
+}
+
+# True if $1 appears as a `connected` output in xrandr.
+output_is_connected() {
+  xrandr -q | awk -v out="$1" '
+    $1 == out && $2 == "connected" { found = 1 }
+    END { exit !found }
+  '
+}
+
+# Reset desktops on the laptop monitor to the named single-monitor set.
+set_laptop_desktops() {
+  set -- tty browse 3 4 5 6 7 8 9 misc
+  bspc monitor "$LAPTOP" --reset-desktops "$@"
+}
+
+# Reset desktops on the external monitor to the suffixed dual-monitor set.
+set_external_desktops() {
+  ext="$1"
+  set -- 'tty.2' 'browse.2' '3.2' '4.2' '5.2' '6.2' '7.2' '8.2' \
+    '9.2' 'misc.2'
+  bspc monitor "$ext" --reset-desktops "$@"
+}
+
+# Move every node from $src desktop to $dst desktop. No-op if $src is gone.
+merge_nodes() {
+  src="$1"
+  dst="$2"
+  if ! bspc query -D -d "$src" >/dev/null 2>&1; then
+    return 0
+  fi
+  bspc query -N -d "$src" | while read -r node; do
+    [ "$node" != "" ] || continue
+    bspc node "$node" --to-desktop "$dst" >/dev/null 2>&1 || true
+  done
+}
+
+# Configure dual-monitor topology with $ext as primary on the right.
+reconcile_attach() {
+  ext="$1"
+  xrandr \
+    --output "$ext" --primary --auto \
+    --output "$LAPTOP" --auto --left-of "$ext"
+
+  # Wait for bspwm to register the new monitor (RandR notify is async).
+  i=0
+  while [ "$i" -lt 20 ]; do
+    if bspc query -M --names | grep -qx -- "$ext"; then
+      break
+    fi
+    sleep 0.05
+    i=$((i + 1))
+  done
+
+  set_laptop_desktops
+  set_external_desktops "$ext"
+
+  # Re-source rules so newly-added monitor matters for desktop= selectors.
+  rules="${XDG_CONFIG_HOME:-${HOME}/.config}/bspwm/conf.d/20-rules.sh"
+  if [ -r "$rules" ]; then
+    # shellcheck source=/dev/null
+    . "$rules"
+  fi
+
+  # Initial focus: external slot 1.
+  bspc desktop "${ext}:^1" --focus >/dev/null 2>&1 || true
+}
+
+# Tear down any non-laptop bspwm monitor whose output is no longer connected,
+# merging its windows onto the laptop by slot index first.
+reconcile_detach() {
+  bspc query -M --names | while read -r m; do
+    [ "$m" != "" ] || continue
+    if [ "$m" = "$LAPTOP" ]; then
+      continue
+    fi
+    if output_is_connected "$m"; then
+      continue
+    fi
+    i=1
+    while [ "$i" -le 10 ]; do
+      merge_nodes "${m}:^${i}" "${LAPTOP}:^${i}"
+      i=$((i + 1))
+    done
+    bspc monitor "$m" --remove >/dev/null 2>&1 || true
+  done
+
+  # Disable any disconnected non-laptop outputs xrandr still tracks.
+  xrandr -q | awk '$2 == "disconnected" { print $1 }' \
+    | while read -r out; do
+      [ "$out" != "" ] || continue
+      if [ "$out" != "$LAPTOP" ]; then
+        xrandr --output "$out" --off >/dev/null 2>&1 || true
+      fi
+    done
+
+  set_laptop_desktops
+}
+
+reconcile() {
+  if ! command -v xrandr >/dev/null 2>&1; then
+    printf 'bspwm-monitor: xrandr not installed; cannot reconcile.\n' >&2
+    return 1
+  fi
+  ext=$(external_output)
+  if [ "$ext" != "" ]; then
+    reconcile_attach "$ext"
+  else
+    reconcile_detach
+  fi
+}
+
+main() {
+  cmd="${1:-reconcile}"
+  case "$cmd" in
+    reconcile | init | attach | detach)
+      reconcile
+      ;;
+    *)
+      printf 'usage: %s {reconcile|init|attach|detach}\n' "${0##*/}" >&2
+      exit 2
+      ;;
+  esac
+}
+
+main "$@"

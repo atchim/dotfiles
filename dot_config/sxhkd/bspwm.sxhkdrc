@@ -1,0 +1,154 @@
+# bspwm-specific bindings. Loaded alongside the general sxhkdrc by the bspwm
+# autostart. Vim-philosophy: h/j/k/l motions, `super + w` is the window-level
+# leader (Vim <C-w>), `super + r` is the meta leader (rotate / restart),
+# `super + e` is the edge-presel leader. Slot bindings always address the
+# focused monitor via `focused:^N` so the same digit row works on either.
+
+#--- Node state ---------------------------------------------------------------
+
+# Toggle the focused window's tiling state.
+super + {f,p,s,t}
+  bspc node --state {fullscreen,pseudo_tiled,floating,tiled}
+
+# Toggle a flag on the focused node (hidden / locked / sticky / private / mark).
+super + {a,X,y,z,apostrophe}
+  bspc node --flag {hidden,locked,sticky,private,marked}
+
+#--- Focus / swap -------------------------------------------------------------
+
+# Focus or swap the focused window in a cardinal direction (crosses monitors).
+super + {_,shift + }{h,j,k,l}
+  bspc node --{focus,swap} {west,south,north,east}
+
+# Focus the previous/next window inside the current desktop.
+super + {comma,period}
+  bspc node --focus {prev,next}.local.window
+
+# Focus the previously focused window.
+super + {Escape,grave}
+  bspc node --focus last.local.window
+
+# Focus the previously focused desktop on the focused monitor.
+super + Tab
+  bspc desktop --focus last.local
+
+# Focus the older/newer window in the focus history (toggle history off
+# during the jump so the cursor doesn't stick to itself).
+super + {i,o}
+  bspc wm --record-history off; \
+  bspc node {newer,older} --focus; \
+  bspc wm --record-history on
+
+# Swap the focused window with the largest window on this desktop.
+super + g
+  bspc node --swap biggest.window.local
+
+# Swap the focused window with the marked window.
+super + x
+  bspc node --swap newest.marked
+
+# Transplant the marked node into the newest non-automatic node;
+# fall back to moving the focused node if nothing is marked.
+super + bracketright
+  bspc node newest.marked --to-node newest.!automatic \
+    || bspc node --to-node newest.!automatic
+
+# Circulate sibling windows in the parent split forward / backward.
+super + {_,shift + }c
+  bspc node @/ --circulate {forward,backward}
+
+#--- Desktop selection (per-monitor; `focused:^N`) ----------------------------
+
+# Focus the Nth slot on the focused monitor (0 -> slot 10 = misc).
+super + {1-9,0}
+  bspc desktop --focus 'focused:^{1-9,10}'
+
+# Send the focused node to the Nth slot on the focused monitor.
+super + shift + {1-9,0}
+  bspc node --to-desktop 'focused:^{1-9,10}'
+
+# Send the focused node to the Nth slot on the focused monitor and follow.
+super + ctrl + {1-9,0}
+  bspc node --to-desktop 'focused:^{1-9,10}' --follow
+
+# Focus the previous/next occupied desktop on the focused monitor.
+super + {less,greater}
+  bspc desktop --focus {prev,next}.local.occupied
+
+#--- Monitor / window leader (super + w) --------------------------------------
+
+# Focus the monitor in a cardinal direction.
+super + w ; {h,j,k,l}
+  bspc monitor --focus {west,south,north,east}
+
+# Send the focused node to the monitor in a cardinal direction and follow.
+super + w ; shift + {h,j,k,l}
+  bspc node --to-monitor {west,south,north,east} --follow
+
+# Swap the current desktop with the focused desktop on the neighbour monitor.
+super + w ; g ; {h,j,k,l}
+  bspc desktop --swap {west,south,north,east}:focused
+
+# Open the rofi window picker (jump to any window across monitors).
+super + w ; w
+  rofi -modi window -show window -show-icons
+
+#--- Reshape ------------------------------------------------------------------
+
+# Resize: pull the corresponding outer edge outward by 20 pixels.
+super + ctrl + {h,j,k,l}
+  bspc node --resize {left -20 0,bottom 0 20,top 0 -20,right 20 0}
+
+# Resize: push the corresponding outer edge inward by 20 pixels.
+super + ctrl + shift + {h,j,k,l}
+  bspc node --resize {left 20 0,bottom 0 -20,top 0 20,right -20 0}
+
+# Move a floating window by 20 pixels.
+super + {Down,Left,Right,Up}
+  bspc node --move {0 20,-20 0,20 0,0 -20}
+
+# Balance the current tile tree (equalize all splits).
+super + equal
+  bspc node @/ --balance
+
+# Reset the parent split ratio to 0.5.
+super + minus
+  bspc node @parent --ratio 0.5
+
+# Cycle the desktop layout (tiled <-> monocle).
+super + m
+  bspc desktop --layout next
+
+# Rotate the root tree clockwise.
+super + r ; r
+  bspc node @/ --rotate 90
+
+# Rotate the root tree counter-clockwise.
+super + r ; shift + r
+  bspc node @/ --rotate 270
+
+# Transpose the nearest split (rotate just the parent node).
+super + r ; t
+  bspc node @parent --rotate 90
+
+# Preselect the next split direction (edge to split on).
+super + e ; {h,j,k,l}
+  bspc node --presel-dir {west,south,north,east}
+
+# Cancel the preselection.
+super + e ; space
+  bspc node --presel-dir cancel
+
+#--- Meta ---------------------------------------------------------------------
+
+# Close (well-mannered) / kill (forced) the focused window.
+super + {_,shift + }q
+  bspc node focused.window --{close,kill}
+
+# Quit bspwm.
+super + alt + q
+  bspc quit
+
+# Restart bspwm in place (re-runs bspwmrc; reloads conf.d, rules, monitors).
+super + r ; w
+  bspc wm --restart
