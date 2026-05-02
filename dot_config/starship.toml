@@ -1,3 +1,4 @@
+"$schema" = 'https://starship.rs/config-schema.json'
 add_newline = false
 
 [aws]
@@ -15,7 +16,7 @@ format = "[$symbol($version(-$name) )]($style)"
 [character]
 error_symbol = '[❱](bold fg:1)'
 success_symbol = '[❱](bold fg:2)'
-vicmd_symbol = '[](bold fg:14)'
+vimcmd_symbol = '[](bold fg:14)'
 
 [cmake]
 format = "[$symbol($version )]($style)"
@@ -106,6 +107,9 @@ format = "[$symbol($version )]($style)"
 
 [kotlin]
 format = "[$symbol($version )]($style)"
+
+[line_break]
+disabled = true
 
 [lua]
 format = "[$symbol($version )]($style)"
