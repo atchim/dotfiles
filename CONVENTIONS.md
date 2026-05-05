@@ -86,13 +86,13 @@ A closed list. Use `TAG: text` — capital tag, colon, single space, then text.
 The tag opens the comment; no leading prose. Multi-line continuation indents
 to align with the text after the colon.
 
-- `TODO:` — Intentional future work; code is currently fine without it.
-- `FIXME:` — Known bug or incorrect behavior; fix before relying on it.
-- `HACK:` — Works, but the approach is ugly or fragile; explain why and
-  what's better.
-- `NOTE:` — Non-obvious context a reader needs. Use sparingly — if a normal
-  comment carries it, no tag.
-- `SEE:` — Pointer to an external resource (URL, file path, ticket).
+| Tag      | Meaning                                                                                     |
+| -------- | ------------------------------------------------------------------------------------------- |
+| `TODO:`  | Intentional future work; code is currently fine without it.                                 |
+| `FIXME:` | Known bug or incorrect behavior; fix before relying on it.                                  |
+| `HACK:`  | Works, but the approach is ugly or fragile; explain why and what's better.                  |
+| `NOTE:`  | Non-obvious context a reader needs. Use sparingly — if a normal comment carries it, no tag. |
+| `SEE:`   | Pointer to an external resource (URL, file path, ticket).                                   |
 
 ```sh
 # TODO: rewrite this when bspwm gains native multi-monitor reconcile;
