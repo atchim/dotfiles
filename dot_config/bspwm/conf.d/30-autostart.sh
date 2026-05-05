@@ -1,4 +1,5 @@
 # shellcheck shell=sh
+
 # Bring monitors + desktops into a known state, then start the helpers
 # that keep them there (RandR watcher) and the keybinding daemon.
 

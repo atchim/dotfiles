@@ -1,5 +1,4 @@
 # shellcheck shell=sh
-# bspwm general options. Sourced from bspwmrc; not directly executable.
 
 bspc config border_width 2
 bspc config window_gap 8

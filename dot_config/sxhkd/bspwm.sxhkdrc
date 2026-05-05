@@ -1,20 +1,16 @@
-# bspwm-specific bindings. Loaded alongside the general sxhkdrc by the bspwm
-# autostart. Vim-philosophy: h/j/k/l motions, `super + w` is the window-level
-# leader (Vim <C-w>), `super + r` is the meta leader (rotate / restart),
-# `super + e` is the edge-presel leader. Slot bindings always address the
-# focused monitor via `focused:^N` so the same digit row works on either.
-
-#--- Node state ---------------------------------------------------------------
+# Node State
+# ----------
 
 # Toggle the focused window's tiling state.
 super + {f,p,s,t}
   bspc node --state {fullscreen,pseudo_tiled,floating,tiled}
 
-# Toggle a flag on the focused node (hidden / locked / sticky / private / mark).
+# Toggle a flag on the focused node.
 super + {a,X,y,z,apostrophe}
   bspc node --flag {hidden,locked,sticky,private,marked}
 
-#--- Focus / swap -------------------------------------------------------------
+# Focus/Swap
+# ----------
 
 # Focus or swap the focused window in a cardinal direction (crosses monitors).
 super + {_,shift + }{h,j,k,l}
@@ -32,8 +28,7 @@ super + {Escape,grave}
 super + Tab
   bspc desktop --focus last.local
 
-# Focus the older/newer window in the focus history (toggle history off
-# during the jump so the cursor doesn't stick to itself).
+# Focus the older/newer window in the focus history.
 super + {i,o}
   bspc wm --record-history off; \
   bspc node {newer,older} --focus; \
@@ -57,7 +52,8 @@ super + bracketright
 super + {_,shift + }c
   bspc node @/ --circulate {forward,backward}
 
-#--- Desktop selection (per-monitor; `focused:^N`) ----------------------------
+# Desktop Selection (Per-Monitor; `focused:^N`)
+# ---------------------------------------------
 
 # Focus the Nth slot on the focused monitor (0 -> slot 10 = misc).
 super + {1-9,0}
@@ -75,7 +71,8 @@ super + ctrl + {1-9,0}
 super + {less,greater}
   bspc desktop --focus {prev,next}.local.occupied
 
-#--- Monitor / window leader (super + w) --------------------------------------
+# Monitor / Window Leader (`super + w`)
+# -------------------------------------
 
 # Focus the monitor in a cardinal direction.
 super + w ; {h,j,k,l}
@@ -93,7 +90,8 @@ super + w ; g ; {h,j,k,l}
 super + w ; w
   rofi -modi window -show window -show-icons
 
-#--- Reshape ------------------------------------------------------------------
+# Reshape
+# -------
 
 # Resize: pull the corresponding outer edge outward by 20 pixels.
 super + ctrl + {h,j,k,l}
@@ -139,7 +137,8 @@ super + e ; {h,j,k,l}
 super + e ; space
   bspc node --presel-dir cancel
 
-#--- Meta ---------------------------------------------------------------------
+# Meta
+# ----
 
 # Close (well-mannered) / kill (forced) the focused window.
 super + {_,shift + }q

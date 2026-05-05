@@ -1,7 +1,6 @@
 #!/bin/sh
-# Source every fragment in conf.d in lexical order. Numeric prefixes pin
-# load order (00-options before 10-colors before 20-rules before 30-autostart).
 
+# Source every fragment in `conf.d` in lexical order.
 for f in "${XDG_CONFIG_HOME:-$HOME/.config}"/bspwm/conf.d/*.sh; do
   [ -r "$f" ] || continue
   # shellcheck source=/dev/null

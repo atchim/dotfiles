@@ -1,7 +1,3 @@
-# General (non-bspwm) bindings. Loaded alongside bspwm.sxhkdrc by the bspwm
-# autostart. WM-related window/monitor ops live in bspwm.sxhkdrc under the
-# `super + w` leader; rofi-window has moved there as `super + w ; w`.
-
 # Switch keyboard layout to pt-BR (ABNT2).
 super + space ; k ; b
   setxkbmap -model abnt2 -layout br \

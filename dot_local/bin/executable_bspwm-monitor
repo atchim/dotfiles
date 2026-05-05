@@ -1,4 +1,5 @@
 #!/bin/sh
+
 # bspwm-monitor — reconcile bspwm + xrandr to the live monitor topology.
 #
 # Subcommands (all idempotent; default is `reconcile`):
