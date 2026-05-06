@@ -10,7 +10,8 @@ test_cmd() { command -v "$1" >/dev/null; }
 
 test_cmd nvim && alias vi=nvim
 
-# ---
+# Prompt
+# ------
 
 test_cmd starship && eval "$(starship init bash)"
 

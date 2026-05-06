@@ -71,3 +71,8 @@ Enable pre-commit hooks after cloning:
 ```sh
 pre-commit install
 ```
+
+## Conventions
+
+Style and structure rules used in this repo live in `CONVENTIONS.md`
+(universal) and per-app `CONVENTIONS.md` files alongside each config.

@@ -16,14 +16,14 @@ bspc rule --add Google-chrome desktop='focused:^2' follow=on
 bspc rule --add qutebrowser desktop='focused:^2' follow=on
 bspc rule --add Vivaldi-stable desktop='focused:^2' follow=on
 
-# State rules
+# State Rules
 # -----------
 
 bspc rule --add '*:popup' state=floating
 bspc rule --add vlc state=floating
 bspc rule --add Zathura state=tiled
 
-# Image editors
+# Image Editors
 # -------------
 
 # Follow focus when a child window spawns.

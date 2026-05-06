@@ -1,7 +1,7 @@
-# Fish Conventions
+# fish Conventions
 
-App-specific conventions for `dot_config/fish/`. Universal rules and
-language-level Fish idioms live in the repo-root `CONVENTIONS.md`.
+Conventions for `dot_config/fish/`. Universal rules live in repo-root
+`CONVENTIONS.md`.
 
 ## Directory Layout
 
@@ -11,6 +11,8 @@ language-level Fish idioms live in the repo-root `CONVENTIONS.md`.
   `conf.d/`. Empty or near-empty in normal use.
 - `functions/{name}.fish` — one function per file. Fish autoloads each
   function on first call by its filename.
+- Tiny `conf.d/*.fish` files don't get a header docstring — the
+  filename is the documentation.
 
 ## Function Documentation
 

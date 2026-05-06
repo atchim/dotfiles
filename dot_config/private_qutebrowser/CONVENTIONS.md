@@ -1,8 +1,15 @@
-# Qutebrowser Config Conventions
+# qutebrowser Conventions
 
-App-specific architectural conventions for `dot_config/private_qutebrowser/`.
-General Python idioms and universal rules live in the repo-root
-`CONVENTIONS.md`.
+Conventions for `dot_config/private_qutebrowser/`. Universal rules live
+in repo-root `CONVENTIONS.md`.
+
+## Python
+
+- Tuple `(...)` for fixed sequences; list `[...]` only when the contents
+  will mutate.
+- Type hints on every function signature.
+- Leading underscore for module-private names (`_DOMAINS`, `_helper`).
+- `__all__` for modules that exist purely to re-export names.
 
 ## Domain-Module Pattern
 

@@ -29,7 +29,8 @@ push_dir "$HOME/.local/share/man" MANPATH
 
 test_cmd nvim && export EDITOR=nvim
 
-# ---
+# Inherit Bashrc
+# --------------
 
 # shellcheck disable=SC1090
 [[ -f ~/.bashrc ]] && . ~/.bashrc

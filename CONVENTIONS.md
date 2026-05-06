@@ -30,11 +30,13 @@ _MINIMAL = (
 )
 
 # Good — the structure reads as what it is: a list of commands joined by `;;`.
-_MINIMAL = ';;'.join([
-  'set tabs.show never',
-  'set statusbar.show in-mode',
-  'set scrolling.bar never',
-])
+_MINIMAL = ';;'.join(
+  [
+    'set tabs.show never',
+    'set statusbar.show in-mode',
+    'set scrolling.bar never',
+  ]
+)
 ```
 
 ### Prefer Correctness by Construction Over Correctness by Discipline
@@ -193,55 +195,6 @@ Formatting and lint rules live in `.editorconfig` and
 `.pre-commit-config.yaml`. The sections below capture only what tooling
 can't enforce.
 
-App-specific patterns (sxhkd bindings, qutebrowser config architecture, etc.)
-live in per-config `CONVENTIONS.md` files alongside the code they govern.
-
-### Bash
-
-Bash is a superset of POSIX shell; all conventions in `Shell` below also
-apply. Prefer `#!/bin/sh` unless you specifically need a bash extension.
-
-- Use `[[ ... ]]` over `[ ... ]` for tests. No word-splitting pitfalls,
-  supports pattern and regex matching.
-- `set -o pipefail` is allowed in addition to `-eu` (it's bash-only).
-
-### Fish
-
-- `conf.d/*.fish` holds per-topic config. `config.fish` is reserved for
-  late-startup logic that must run after conf.d.
-- One function per file under `functions/{name}.fish` — fish autoloads them.
-- Document functions with `--description '...'`, never with a `#` comment
-  above the definition.
-- Use `--wraps cmd` when defining an alias-style function so completions
-  inherit from the wrapped command.
-- Default scope for session variables in `conf.d/` is `set -g`.
-- Tiny `conf.d/` files don't get a header docstring — the filename is the
-  documentation.
-
-### Markdown
-
-- Wrap prose at 79 columns (matches `.editorconfig`). Code blocks, URLs, and
-  tables are exempt.
-- Hyphen `-` for unordered lists; never `*` or `+`.
-- ATX headings (`# Title`) for documents. Setext headings are reserved for
-  in-code segment labels (see `Labels`).
-- Bare URLs in autolinks (`<url>`); named links as `[text](url)`.
-- Inline code in `` `backticks` ``.
-- Em dash for inline separation, space-padded around the dash.
-- Bold uses `**text**` (asterisks); italic uses `_text_` (underscores) —
-  matches prettier defaults and avoids visual collision between the two.
-  Plain bold for terms, even definitional ones — no italic-and-bold
-  combinations.
-- Code fences carry a language tag (` ```python `), never bare.
-
-### Python
-
-- Tuple `(...)` for fixed sequences; list `[...]` only when the contents
-  will mutate.
-- Type hints on every function signature.
-- Leading underscore for module-private names (`_DOMAINS`, `_helper`).
-- `__all__` for modules that exist purely to re-export names.
-
 ### Shell
 
 POSIX-portable conventions. Apply to every `#!/bin/sh` script and every
@@ -284,6 +237,41 @@ sourced `.sh` file.
   H2 labels apply only to in-code segments, not to the file's opening
   documentation block.
 
-### sxhkd
+### Bash
 
-See `dot_config/sxhkd/CONVENTIONS.md`.
+Bash is a superset of POSIX shell; every rule under `Shell` applies.
+Prefer `#!/bin/sh` unless you specifically need a bash extension.
+
+- Use `[[ ... ]]` over `[ ... ]` for tests. No word-splitting pitfalls,
+  supports pattern and regex matching.
+- `set -o pipefail` is allowed in addition to `-eu` (it's bash-only).
+
+### Markdown
+
+- Wrap prose at 79 columns (matches `.editorconfig`). Code blocks, URLs, and
+  tables are exempt.
+- Hyphen `-` for unordered lists; never `*` or `+`.
+- ATX headings (`# Title`) for documents. Setext headings are reserved for
+  in-code segment labels (see `Labels`).
+- Bare URLs in autolinks (`<url>`); named links as `[text](url)`.
+- Inline code in `` `backticks` ``.
+- Em dash for inline separation, space-padded around the dash.
+- Bold uses `**text**` (asterisks); italic uses `_text_` (underscores) —
+  matches prettier defaults and avoids visual collision between the two.
+  Plain bold for terms, even definitional ones — no italic-and-bold
+  combinations.
+- Code fences carry a language tag (` ```python `), never bare.
+
+## Vim Modeline
+
+Files whose extension or shebang doesn't disambiguate the language end
+with a single trailing line `# vim: ft=<lang>` so vim picks up the
+filetype:
+
+```bash
+# vim: ft=bash
+```
+
+Applies to `.bashrc`, `.bash_profile`, tmux `*.conf`, and similar.
+Files whose extension or shebang already disambiguates (`.sh`, `.fish`,
+`.py`, `.sxhkdrc`, etc.) skip it.

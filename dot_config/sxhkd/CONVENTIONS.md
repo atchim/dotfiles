@@ -1,7 +1,7 @@
 # sxhkd Conventions
 
-App-specific conventions for `dot_config/sxhkd/`. Universal rules live in
-the repo-root `CONVENTIONS.md`.
+Conventions for `dot_config/sxhkd/`. Universal rules live in repo-root
+`CONVENTIONS.md`.
 
 ## Per-Binding Comment
 

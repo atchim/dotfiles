@@ -1,8 +1,7 @@
 # bspwm Conventions
 
-App-specific conventions for `dot_config/bspwm/` and its helper scripts in
-`dot_local/bin/`. Universal rules and POSIX shell conventions live in the
-repo-root `CONVENTIONS.md`.
+Conventions for `dot_config/bspwm/` and its helper scripts in
+`dot_local/bin/`. Universal rules live in repo-root `CONVENTIONS.md`.
 
 ## Modular `conf.d/`
 

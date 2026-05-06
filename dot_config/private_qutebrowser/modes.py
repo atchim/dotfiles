@@ -1,22 +1,28 @@
 from _types import ConfigAPI, ConfigContainer
 
-_DEFAULT = (
-  'set tabs.show always ;; '
-  'set tabs.position top ;; '
-  'set tabs.width 15% ;; '
-  'set statusbar.show in-mode ;; '
-  'set scrolling.bar when-searching'
+_DEFAULT = ';;'.join(
+  [
+    'set tabs.show always',
+    'set tabs.position top',
+    'set tabs.width 15%',
+    'set statusbar.show in-mode',
+    'set scrolling.bar when-searching',
+  ]
 )
-_INFO = (
-  'set tabs.show always ;; '
-  'set tabs.position left ;; '
-  'set tabs.width 250 ;; '
-  'set statusbar.show always'
+_INFO = ';;'.join(
+  [
+    'set tabs.show always',
+    'set tabs.position left',
+    'set tabs.width 250',
+    'set statusbar.show always',
+  ]
 )
-_MINIMAL = (
-  'set tabs.show never ;; '
-  'set statusbar.show in-mode ;; '
-  'set scrolling.bar never'
+_MINIMAL = ';;'.join(
+  [
+    'set tabs.show never',
+    'set statusbar.show in-mode',
+    'set scrolling.bar never',
+  ]
 )
 
 
