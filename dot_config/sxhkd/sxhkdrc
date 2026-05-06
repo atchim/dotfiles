@@ -12,15 +12,15 @@ super + space ; k ; u
 super + Return
   alacritty msg create-window || alacritty
 
-# Open alsamixer in a popup-class terminal.
+# Open alsamixer in a floating terminal.
 super + space ; m
-  alacritty msg create-window --class popup -e alsamixer -g \
-    || alacritty --class popup -e alsamixer -g
+  alacritty msg create-window --class floating -e alsamixer -g \
+    || alacritty --class floating -e alsamixer -g
 
-# Open htop in a popup-class terminal.
+# Open htop in a floating terminal.
 super + space ; t
-  alacritty msg create-window --class popup -e htop \
-    || alacritty --class popup -e htop
+  alacritty msg create-window --class floating -e htop \
+    || alacritty --class floating -e htop
 
 # Open the rofi run launcher.
 super + space ; space

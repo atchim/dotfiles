@@ -19,7 +19,7 @@ bspc rule --add Vivaldi-stable desktop='focused:^2' follow=on
 # State Rules
 # -----------
 
-bspc rule --add '*:popup' state=floating
+bspc rule --add '*:floating' state=floating
 bspc rule --add vlc state=floating
 bspc rule --add Zathura state=tiled
 
