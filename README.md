@@ -52,9 +52,8 @@ The bspwm config drives a dual-monitor (`eDP` + one external) layout via
   `x11-misc/sxhkd`, `x11-misc/rofi`.
 - [xrandr](https://gitlab.freedesktop.org/xorg/app/xrandr) — `x11-apps/xrandr`.
   Required for the monitor reconcile script.
-- [srandrd](https://github.com/jceb/srandrd) — provided via the personal
-  `eslop` Gentoo overlay (`emerge x11-misc/srandrd`). Watches X RANDR events
-  and runs `bspwm-monitor-event` on every monitor hotplug.
+- [srandrd](https://github.com/jceb/srandrd) — watches X RANDR events and runs
+  `bspwm-monitor-event` on every monitor hotplug.
 
 Border + presel-feedback colors are sourced live from the
 [Oil 8](https://github.com/atchim/oil8) theme, which chezmoi pulls into
