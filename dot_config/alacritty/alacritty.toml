@@ -11,7 +11,7 @@ SHELL = '/bin/fish'
 size = 8
 
 [font.normal]
-family = 'Hack Nerd Font'
+family = 'Hack Nerd Font Mono'
 
 [hints]
 alphabet = 'jkflahdsg'
