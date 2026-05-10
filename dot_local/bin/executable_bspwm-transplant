@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# bspwm-transplant — transplant the marked node into the newest non-automatic
+# node, falling back to the focused node when nothing is marked.
+
+set -eu
+
+# Print usage to stderr and exit non-zero.
+usage() {
+  printf 'usage: %s\n' "${0##*/}" >&2
+  exit 2
+}
+
+# Run the transplant with marked-or-focused fallback.
+transplant() {
+  bspc node newest.marked --to-node newest.!automatic 2>/dev/null \
+    || bspc node --to-node newest.!automatic
+}
+
+main() {
+  [ "$#" -eq 0 ] || usage
+  transplant
+}
+
+main "$@"

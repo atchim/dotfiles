@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# bspwm-resize — expand or contract the focused node by a fixed step.
+#
+# Usage:
+#   bspwm-resize <expand|contract> <left|down|up|right>
+#
+# `expand` pulls the corresponding outer edge outward; `contract` pushes it
+# inward. The step magnitude is fixed by the `STEP` constant below.
+
+set -eu
+
+readonly STEP='20'
+
+# Print usage to stderr and exit non-zero.
+usage() {
+  printf 'usage: %s <expand|contract> <left|down|up|right>\n' "${0##*/}" >&2
+  exit 2
+}
+
+# Apply the resize for the given action and direction.
+resize() {
+  case "$1 $2" in
+    'expand left') bspc node --resize left "-$STEP" 0 ;;
+    'expand down') bspc node --resize bottom 0 "$STEP" ;;
+    'expand up') bspc node --resize top 0 "-$STEP" ;;
+    'expand right') bspc node --resize right "$STEP" 0 ;;
+    'contract left') bspc node --resize left "$STEP" 0 ;;
+    'contract down') bspc node --resize bottom 0 "-$STEP" ;;
+    'contract up') bspc node --resize top 0 "$STEP" ;;
+    'contract right') bspc node --resize right "-$STEP" 0 ;;
+    *) usage ;;
+  esac
+}
+
+main() {
+  [ "$#" -eq 2 ] || usage
+  resize "$1" "$2"
+}
+
+main "$@"

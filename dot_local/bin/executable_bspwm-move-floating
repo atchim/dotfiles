@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# bspwm-move-floating — move the focused node by a fixed step.
+#
+# Usage:
+#   bspwm-move-floating <left|down|up|right>
+#
+# The step magnitude is fixed by the `STEP` constant below. The node must be
+# floating for `bspc node --move` to take effect.
+
+set -eu
+
+readonly STEP='20'
+
+# Print usage to stderr and exit non-zero.
+usage() {
+  printf 'usage: %s <left|down|up|right>\n' "${0##*/}" >&2
+  exit 2
+}
+
+# Move the focused node STEP pixels in the given direction.
+move() {
+  case "$1" in
+    left) bspc node --move "-$STEP" 0 ;;
+    down) bspc node --move 0 "$STEP" ;;
+    up) bspc node --move 0 "-$STEP" ;;
+    right) bspc node --move "$STEP" 0 ;;
+    *) usage ;;
+  esac
+}
+
+main() {
+  [ "$#" -eq 1 ] || usage
+  move "$1"
+}
+
+main "$@"

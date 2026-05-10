@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# bspwm-focus-history — focus the older or newer node in the focus history
+# without polluting the history itself.
+#
+# Usage:
+#   bspwm-focus-history <older|newer>
+#
+# History recording is suspended for the focus jump, then restored via an
+# EXIT trap so it survives interruption or failure of the inner command.
+
+set -eu
+
+# Print usage to stderr and exit non-zero.
+usage() {
+  printf 'usage: %s <older|newer>\n' "${0##*/}" >&2
+  exit 2
+}
+
+# Focus the older/newer node, restoring history-recording on exit.
+focus_history() {
+  case "$1" in
+    older | newer) ;;
+    *) usage ;;
+  esac
+  bspc wm --record-history off
+  trap 'bspc wm --record-history on' EXIT
+  bspc node "$1" --focus
+}
+
+main() {
+  [ "$#" -eq 1 ] || usage
+  focus_history "$1"
+}
+
+main "$@"
