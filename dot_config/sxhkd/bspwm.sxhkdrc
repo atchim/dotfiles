@@ -6,7 +6,7 @@ super + {f,p,s,t}
   bspc node --state {fullscreen,pseudo_tiled,floating,tiled}
 
 # Toggle a flag on the focused node.
-super + {a,X,y,z,apostrophe}
+super + {a,x,y,z,m}
   bspc node --flag {hidden,locked,sticky,private,marked}
 
 # Focus/Swap
@@ -17,7 +17,7 @@ super + {_,shift + }{h,j,k,l}
   bspc node --{focus,swap} {west,south,north,east}
 
 # Focus the previous/next window inside the current desktop.
-super + {comma,period}
+super + {bracketleft,bracketright}
   bspc node --focus {prev,next}.local.window
 
 # Focus the previously focused window.
@@ -39,12 +39,12 @@ super + g
   bspc node --swap biggest.window.local
 
 # Swap the focused window with the marked window.
-super + x
+super + apostrophe
   bspc node --swap newest.marked
 
 # Transplant the marked node into the newest non-automatic node;
 # fall back to moving the focused node if nothing is marked.
-super + bracketright
+super + ctrl + bracketright
   bspc node newest.marked --to-node newest.!automatic \
     || bspc node --to-node newest.!automatic
 
@@ -68,7 +68,7 @@ super + ctrl + {1-9,0}
   bspc node --to-desktop 'focused:^{1-9,10}' --follow
 
 # Focus the previous/next occupied desktop on the focused monitor.
-super + {less,greater}
+super + {braceleft,braceright}
   bspc desktop --focus {prev,next}.local.occupied
 
 # Monitor / Window Leader (`super + w`)
@@ -93,17 +93,17 @@ super + w ; w
 # Reshape
 # -------
 
-# Resize: pull the corresponding outer edge outward by 20 pixels.
-super + ctrl + {h,j,k,l}
+# Resize: pull the corresponding outer edge outward by 20 pixels (sticky mode).
+super + w ; s : {h,j,k,l}
   bspc node --resize {left -20 0,bottom 0 20,top 0 -20,right 20 0}
 
-# Resize: push the corresponding outer edge inward by 20 pixels.
-super + ctrl + shift + {h,j,k,l}
+# Resize: push the corresponding outer edge inward by 20 pixels (sticky mode).
+super + w ; s : shift + {h,j,k,l}
   bspc node --resize {left 20 0,bottom 0 -20,top 0 20,right -20 0}
 
-# Move a floating window by 20 pixels.
-super + {Down,Left,Right,Up}
-  bspc node --move {0 20,-20 0,20 0,0 -20}
+# Move a floating window by 20 pixels (sticky mode).
+super + w ; m : {h,j,k,l}
+  bspc node --move {-20 0,0 20,0 -20,20 0}
 
 # Balance the current tile tree (equalize all splits).
 super + equal
@@ -114,19 +114,19 @@ super + minus
   bspc node @parent --ratio 0.5
 
 # Cycle the desktop layout (tiled <-> monocle).
-super + m
+super + shift + m
   bspc desktop --layout next
 
 # Rotate the root tree clockwise.
-super + r ; r
+super + r
   bspc node @/ --rotate 90
 
 # Rotate the root tree counter-clockwise.
-super + r ; shift + r
+super + shift + r
   bspc node @/ --rotate 270
 
 # Transpose the nearest split (rotate just the parent node).
-super + r ; t
+super + ctrl + r
   bspc node @parent --rotate 90
 
 # Preselect the next split direction (edge to split on).
@@ -149,5 +149,5 @@ super + alt + q
   bspc quit
 
 # Restart bspwm in place (re-runs bspwmrc; reloads conf.d, rules, monitors).
-super + r ; w
+super + ctrl + l ; w
   bspc wm --restart

@@ -27,5 +27,5 @@ super + space ; space
   rofi -modi run -show run -theme dmenu
 
 # Reload sxhkd's configuration in place.
-super + r ; s
+super + ctrl + l ; s
   pkill -USR1 --exact sxhkd
