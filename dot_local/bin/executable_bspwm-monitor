@@ -12,9 +12,9 @@
 #   - The laptop output is `eDP`.
 #   - The external is the first non-eDP `connected` output in `xrandr -q`.
 #   - When external is present: external is primary, eDP --left-of external.
-#     Each monitor owns 10 desktops; the external's are suffixed `.2` so
+#     Each monitor owns 10 desktops; the external's are suffixed `.x` so
 #     bspwm's globally-unique-name constraint is satisfied. Initial focus
-#     lands on external slot 1 (`tty.2`).
+#     lands on external slot 1 (`tty.x`).
 #   - When external is absent: any leftover non-laptop bspwm monitor has
 #     its windows merged onto the laptop by slot index (external slot N's
 #     windows move to laptop slot N), then it is removed.
@@ -40,15 +40,14 @@ output_is_connected() {
 
 # Reset desktops on the laptop monitor to the named single-monitor set.
 set_laptop_desktops() {
-  set -- tty browse 3 4 5 6 7 8 9 misc
+  set -- tty browse d3 d4 d5 d6 d7 d8 d9 misc
   bspc monitor "$LAPTOP" --reset-desktops "$@"
 }
 
 # Reset desktops on the external monitor to the suffixed dual-monitor set.
 set_external_desktops() {
   ext="$1"
-  set -- 'tty.2' 'browse.2' '3.2' '4.2' '5.2' '6.2' '7.2' '8.2' \
-    '9.2' 'misc.2'
+  set -- tty.x browse.x d3.x d4.x d5.x d6.x d7.x d8.x d9.x misc.x
   bspc monitor "$ext" --reset-desktops "$@"
 }
 
