@@ -30,9 +30,7 @@ super + Tab
 
 # Focus the older/newer window in the focus history.
 super + {i,o}
-  bspc wm --record-history off; \
-  bspc node {newer,older} --focus; \
-  bspc wm --record-history on
+  bspwm-focus-history {newer,older}
 
 # Swap the focused window with the largest window on this desktop.
 super + g
@@ -45,8 +43,7 @@ super + apostrophe
 # Transplant the marked node into the newest non-automatic node;
 # fall back to moving the focused node if nothing is marked.
 super + ctrl + bracketright
-  bspc node newest.marked --to-node newest.!automatic \
-    || bspc node --to-node newest.!automatic
+  bspwm-transplant
 
 # Circulate sibling windows in the parent split forward / backward.
 super + {_,shift + }c
@@ -93,17 +90,13 @@ super + w ; w
 # Reshape
 # -------
 
-# Resize: pull the corresponding outer edge outward by 20 pixels (sticky mode).
-super + w ; s : {h,j,k,l}
-  bspc node --resize {left -20 0,bottom 0 20,top 0 -20,right 20 0}
+# Resize the focused node by a fixed step (sticky mode).
+super + w ; s : {_,shift + }{h,j,k,l}
+  bspwm-resize {expand,contract} {left,down,up,right}
 
-# Resize: push the corresponding outer edge inward by 20 pixels (sticky mode).
-super + w ; s : shift + {h,j,k,l}
-  bspc node --resize {left 20 0,bottom 0 -20,top 0 20,right -20 0}
-
-# Move a floating window by 20 pixels (sticky mode).
+# Move a floating node by a fixed step (sticky mode).
 super + w ; m : {h,j,k,l}
-  bspc node --move {-20 0,0 20,0 -20,20 0}
+  bspwm-move-floating {left,down,up,right}
 
 # Balance the current tile tree (equalize all splits).
 super + equal
