@@ -1,0 +1,5 @@
+configuration {
+  font: "Hack Nerd Font Mono 9";
+}
+
+@theme "board"
