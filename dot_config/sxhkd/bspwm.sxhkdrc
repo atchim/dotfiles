@@ -87,6 +87,10 @@ super + w ; g ; {h,j,k,l}
 super + w ; w
   rofi -modi window -show window -show-icons
 
+# Pick a window via rofi and bring it to the current desktop.
+super + w ; t
+  bspwm-take-window
+
 # Reshape
 # -------
 

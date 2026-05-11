@@ -1,0 +1,61 @@
+#!/bin/sh
+
+# bspwm-take-window — pick a bspwm-managed window via rofi and bring it
+# to the focused desktop, focusing the moved window.
+#
+# Each row reads `[desktop] class — title`. The X11 window ID rides
+# along in a hidden first column so the script can act on the
+# selection without exposing the hex ID in the picker UI.
+
+set -eu
+
+# Print the class component of WM_CLASS for window $1.
+window_class() {
+  xprop -id "$1" WM_CLASS 2>/dev/null | awk -F\" '{print $4}'
+}
+
+# Print WM_NAME for window $1.
+window_title() {
+  xprop -id "$1" WM_NAME 2>/dev/null | awk -F\" '{print $2}'
+}
+
+# Print one display row: `[desktop] class — title`.
+format_row() {
+  win="$1"
+  desk=$(bspc query -D -n "$win" --names)
+  cls=$(window_class "$win")
+  title=$(window_title "$win")
+  printf '[%s] %s — %s\n' "$desk" "$cls" "$title"
+}
+
+# Emit one tab-separated row per non-focused managed window.
+# Column 1 carries the X11 ID; column 2 is the display text.
+emit_rows() {
+  focused="$1"
+  bspc query -N --node .window | while IFS= read -r w; do
+    [ "$w" = "" ] && continue
+    [ "$w" = "$focused" ] && continue
+    printf '%s\t%s\n' "$w" "$(format_row "$w")"
+  done
+}
+
+main() {
+  focused=$(bspc query -N -n focused)
+
+  # rofi shows only column 2 (display-columns 2) so the hex ID stays
+  # hidden, but the full row comes back on selection — awk extracts
+  # the ID.
+  selection=$(
+    emit_rows "$focused" \
+      | rofi -dmenu -i -p take \
+        -display-columns 2 -display-column-separator '\t'
+  ) || exit 0
+
+  [ "$selection" = "" ] && exit 0
+
+  win=$(printf '%s\n' "$selection" | awk -F'\t' '{print $1}')
+
+  bspc node "$win" --to-desktop focused --follow
+}
+
+main "$@"
