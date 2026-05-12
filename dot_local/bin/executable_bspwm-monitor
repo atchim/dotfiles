@@ -3,18 +3,23 @@
 # bspwm-monitor — reconcile bspwm + xrandr to the live monitor topology.
 #
 # Subcommands (all idempotent; default is `reconcile`):
-#   reconcile  Detect current state and apply the correct dual/single layout.
-#   init       Alias for `reconcile`; called from bspwmrc autostart.
-#   attach     Alias for `reconcile`; called from a hotplug event.
-#   detach     Alias for `reconcile`; called from a hotplug event.
+#   reconcile        Detect current state and apply dual/single layout.
+#   init             Alias for `reconcile`; called from bspwmrc autostart.
+#   attach           Alias for `reconcile`; called from a hotplug event.
+#   detach           Alias for `reconcile`; called from a hotplug event.
+#   position [dir]   With no arg, echo the saved external direction. With
+#                    `west|south|north|east`, persist it and re-apply xrandr
+#                    if an external is currently connected.
 #
 # Topology rules:
 #   - The laptop output is `eDP`.
 #   - The external is the first non-eDP `connected` output in `xrandr -q`.
-#   - When external is present: external is primary, eDP --left-of external.
-#     Each monitor owns 10 desktops; the external's are suffixed `.x` so
-#     bspwm's globally-unique-name constraint is satisfied. Initial focus
-#     lands on external slot 1 (`tty.x`).
+#   - When external is present: external is primary; its cardinal position
+#     relative to the laptop is read from the state file (default `east`,
+#     i.e. eDP --left-of external). Each monitor owns 10 desktops; the
+#     external's are suffixed `.x` so bspwm's globally-unique-name
+#     constraint is satisfied. Initial focus lands on external slot 1
+#     (`tty.x`).
 #   - When external is absent: any leftover non-laptop bspwm monitor has
 #     its windows merged onto the laptop by slot index (external slot N's
 #     windows move to laptop slot N), then it is removed.
@@ -22,6 +27,8 @@
 set -eu
 
 readonly LAPTOP='eDP'
+readonly STATE_FILE="${XDG_STATE_HOME:-${HOME}/.local/state}/bspwm/monitor-position"
+readonly DEFAULT_POSITION='east'
 
 # Print the first connected non-laptop output from xrandr, or empty.
 external_output() {
@@ -36,6 +43,42 @@ output_is_connected() {
     $1 == out && $2 == "connected" { found = 1 }
     END { exit !found }
   '
+}
+
+# Echo the saved external direction, falling back to DEFAULT_POSITION when
+# the state file is missing or its contents aren't a recognized cardinal.
+read_position() {
+  if [ -r "$STATE_FILE" ]; then
+    dir=$(cat -- "$STATE_FILE" 2>/dev/null || true)
+    case "$dir" in
+      west | south | north | east)
+        printf '%s\n' "$dir"
+        return 0
+        ;;
+    esac
+  fi
+  printf '%s\n' "$DEFAULT_POSITION"
+}
+
+# Persist $1 as the external direction, creating the parent dir if needed.
+write_position() {
+  mkdir -p -- "${STATE_FILE%/*}"
+  printf '%s\n' "$1" >"$STATE_FILE"
+}
+
+# Lay out external $1 and the laptop via xrandr, with the external in the
+# cardinal direction $2 relative to the laptop. External is always primary.
+apply_position() {
+  ext="$1"
+  case "$2" in
+    west) rel='--right-of' ;;
+    east) rel='--left-of' ;;
+    north) rel='--below' ;;
+    south) rel='--above' ;;
+  esac
+  xrandr \
+    --output "$ext" --primary --auto \
+    --output "$LAPTOP" --auto "$rel" "$ext"
 }
 
 # Reset desktops on the laptop monitor to the named single-monitor set.
@@ -64,12 +107,10 @@ merge_nodes() {
   done
 }
 
-# Configure dual-monitor topology with $ext as primary on the right.
+# Configure dual-monitor topology with $ext as primary in the saved direction.
 reconcile_attach() {
   ext="$1"
-  xrandr \
-    --output "$ext" --primary --auto \
-    --output "$LAPTOP" --auto --left-of "$ext"
+  apply_position "$ext" "$(read_position)"
 
   # Wait for bspwm to register the new monitor (RandR notify is async).
   i=0
@@ -139,14 +180,43 @@ reconcile() {
   fi
 }
 
+# Get or set the external's cardinal direction relative to the laptop.
+# No arg: echo the current effective direction. Otherwise persist $1 and
+# re-apply xrandr if an external is currently connected (the preference is
+# stored either way, so it takes effect on the next attach).
+position() {
+  if [ "$#" -eq 0 ]; then
+    read_position
+    return 0
+  fi
+  case "$1" in
+    west | south | north | east) ;;
+    *)
+      printf 'usage: %s position [west|south|north|east]\n' \
+        "${0##*/}" >&2
+      exit 2
+      ;;
+  esac
+  write_position "$1"
+  ext=$(external_output)
+  if [ "$ext" != "" ]; then
+    apply_position "$ext" "$1"
+  fi
+}
+
 main() {
   cmd="${1:-reconcile}"
   case "$cmd" in
     reconcile | init | attach | detach)
       reconcile
       ;;
+    position)
+      shift
+      position "$@"
+      ;;
     *)
-      printf 'usage: %s {reconcile|init|attach|detach}\n' "${0##*/}" >&2
+      printf 'usage: %s {reconcile|init|attach|detach|position [dir]}\n' \
+        "${0##*/}" >&2
       exit 2
       ;;
   esac

@@ -83,6 +83,10 @@ super + w ; shift + {h,j,k,l}
 super + w ; g ; {h,j,k,l}
   bspc desktop --swap {west,south,north,east}:focused
 
+# Place the external monitor in a cardinal direction relative to the laptop.
+super + w ; p ; {h,j,k,l}
+  bspwm-monitor position {west,south,north,east}
+
 # Open the rofi window picker (jump to any window across monitors).
 super + w ; w
   rofi -modi window -show window -show-icons
