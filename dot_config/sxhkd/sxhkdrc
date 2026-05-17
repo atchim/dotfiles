@@ -26,6 +26,19 @@ super + space ; t
 super + space ; space
   rofi -modi run -show run -theme dmenu
 
+# Toggle polybar visibility; reclaim bspwm's bottom padding on hide because
+# polybar's hidden window keeps its strut. Successive presses cycle the body
+# via sxhkd's same-LHS alternation.
+super + b
+  cmd={hide,show}; \
+  [ "$cmd" = hide ] && bspc config bottom_padding 0; \
+  polybar-msg cmd $cmd
+
 # Reload sxhkd's configuration in place.
 super + ctrl + l ; s
   pkill -USR1 --exact sxhkd
+
+# Restart polybar in place; re-reads the loaded config files (does not
+# re-probe hardware — for that, re-run polybar-launch).
+super + ctrl + l ; b
+  polybar-msg cmd restart

@@ -2,3 +2,8 @@
 type = "git-repo"
 url = "https://github.com/atchim/oil8.git"
 refreshPeriod = "168h"
+
+[".local/share/fonts/siji.pcf"]
+type = "file"
+url = "https://raw.githubusercontent.com/stark/siji/master/pcf/siji.pcf"
+refreshPeriod = "8760h"

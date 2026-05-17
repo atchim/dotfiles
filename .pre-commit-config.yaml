@@ -70,6 +70,10 @@ repos:
         args: ['--check']
         language: system
         types: [shell]
+        # polybar-cpu uses intentional `set -- $var` word-splitting to parse
+        # two integers into $1/$2; shellharden's quoting suggestion would
+        # collapse that into a single arg and break the script.
+        exclude: ^dot_local/bin/executable_polybar-cpu$
       - <<: *shellharden-base
         name: Shellharden (Bash config files)
         files: ^dot_bash(rc|_profile)$

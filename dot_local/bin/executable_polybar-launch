@@ -1,0 +1,210 @@
+#!/bin/sh
+
+# polybar-launch — spawn one polybar instance per connected monitor for a
+# named bar config.
+#
+# Usage:
+#   polybar-launch [-p|--position top|bottom] [-t|--tray primary|<out>|none] <bar>
+#
+# Arguments:
+#   -p, --position   Bar edge. Default: bottom.
+#   -t, --tray       Monitor that hosts the system tray. `primary` resolves
+#                    to xrandr's --primary output at launch time. `<out>` is
+#                    an explicit connected output (e.g., eDP). `none` puts
+#                    no tray on any instance. Default: primary.
+#   <bar>            Basename of a config under
+#                    ${XDG_CONFIG_HOME:-~/.config}/polybar/bars/<bar>.ini.
+#                    Must contain a `[bar/<bar>]` section.
+#
+# Env vars exported to each polybar instance:
+#   MONITOR        xrandr output this instance binds to.
+#   BOTTOM         `true` for bottom, `false` for top.
+#   BAT, ADAPTER, BACKLIGHT, WIFI   probed hardware names (or empty).
+#   MODULES_RIGHT  space-separated module list, gated on hardware presence;
+#                  `tray` is prepended only on the chosen tray host instance.
+#
+# Idempotent: kills any running polybar before respawning.
+
+set -eu
+
+POSITION='bottom'
+TRAY_ARG='primary'
+
+readonly CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/polybar"
+
+die() {
+  printf 'polybar-launch: %s\n' "$*" >&2
+  exit 2
+}
+
+# Echo the first /sys/class/power_supply entry of type $1, or nothing.
+probe_power() {
+  for d in /sys/class/power_supply/*; do
+    [ -d "$d" ] || continue
+    t=$(cat -- "$d/type" 2>/dev/null || true)
+    [ "$t" = "$1" ] || continue
+    printf '%s\n' "${d##*/}"
+    return 0
+  done
+}
+
+# Echo the first /sys/class/backlight entry, or nothing.
+probe_backlight() {
+  for d in /sys/class/backlight/*; do
+    [ -d "$d" ] || continue
+    printf '%s\n' "${d##*/}"
+    return 0
+  done
+}
+
+# Echo the first wireless-capable interface under /sys/class/net, or nothing.
+probe_wifi() {
+  for d in /sys/class/net/*/wireless; do
+    [ -d "$d" ] || continue
+    iface=${d%/wireless}
+    printf '%s\n' "${iface##*/}"
+    return 0
+  done
+}
+
+# Echo every connected xrandr output, one per line.
+connected_monitors() {
+  xrandr -q | awk '$2 == "connected" { print $1 }'
+}
+
+# Echo the xrandr --primary output, or empty.
+primary_monitor() {
+  xrandr -q | awk '/ primary / { print $1; exit }'
+}
+
+# Compose modules-right from what hardware is currently present.
+modules_right() {
+  set -- cpu volume
+  if [ "${BACKLIGHT-}" != "" ]; then set -- "$@" backlight; fi
+  if [ "${WIFI-}" != "" ]; then set -- "$@" wifi; fi
+  if [ "${BAT-}" != "" ]; then set -- "$@" battery; fi
+  set -- "$@" date
+  printf '%s\n' "$*"
+}
+
+# Ask running polybars to quit; force-kill stragglers; wait briefly.
+kill_existing() {
+  if ! pgrep -x polybar >/dev/null 2>&1; then
+    return 0
+  fi
+  if command -v polybar-msg >/dev/null 2>&1; then
+    polybar-msg cmd quit >/dev/null 2>&1 || true
+  fi
+  pkill -x polybar >/dev/null 2>&1 || true
+  i=0
+  while pgrep -x polybar >/dev/null 2>&1; do
+    if [ "$i" -ge 20 ]; then
+      break
+    fi
+    sleep 0.05
+    i=$((i + 1))
+  done
+}
+
+parse_args() {
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      -p | --position)
+        [ "$#" -ge 2 ] || die 'missing argument for -p/--position'
+        POSITION="$2"
+        shift 2
+        ;;
+      -t | --tray)
+        [ "$#" -ge 2 ] || die 'missing argument for -t/--tray'
+        TRAY_ARG="$2"
+        shift 2
+        ;;
+      --)
+        shift
+        break
+        ;;
+      -*)
+        die "unknown flag: $1"
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
+  case "$POSITION" in
+    top | bottom) ;;
+    *) die "invalid position: $POSITION (expected top or bottom)" ;;
+  esac
+  if [ "$#" -lt 1 ]; then
+    die 'missing <bar> argument'
+  fi
+  if [ "$#" -gt 1 ]; then
+    die "unexpected extra arguments after <bar>: $2"
+  fi
+  BAR="$1"
+}
+
+# Resolve TRAY_ARG into a concrete monitor name or `none`.
+resolve_tray() {
+  case "$TRAY_ARG" in
+    none)
+      TRAY_HOST='none'
+      ;;
+    primary)
+      TRAY_HOST=$(primary_monitor)
+      if [ "$TRAY_HOST" = "" ]; then
+        die 'no xrandr primary output; pass -t <output> or -t none'
+      fi
+      ;;
+    *)
+      if ! connected_monitors | grep -qx -- "$TRAY_ARG"; then
+        die "tray monitor not connected: $TRAY_ARG"
+      fi
+      TRAY_HOST="$TRAY_ARG"
+      ;;
+  esac
+}
+
+main() {
+  parse_args "$@"
+
+  if ! command -v polybar >/dev/null 2>&1; then
+    die 'polybar not installed'
+  fi
+  if ! command -v xrandr >/dev/null 2>&1; then
+    die 'xrandr not installed'
+  fi
+
+  config="${CONFIG_DIR}/bars/${BAR}.ini"
+  if [ ! -f "$config" ]; then
+    die "bar config not found: $config"
+  fi
+
+  resolve_tray
+  kill_existing
+
+  BAT=$(probe_power Battery || true)
+  ADAPTER=$(probe_power Mains || true)
+  BACKLIGHT=$(probe_backlight || true)
+  WIFI=$(probe_wifi || true)
+  modules_base=$(modules_right)
+  case "$POSITION" in
+    bottom) BOTTOM='true' ;;
+    top) BOTTOM='false' ;;
+  esac
+  export BAT ADAPTER BACKLIGHT WIFI BOTTOM
+
+  connected_monitors | while read -r m; do
+    [ "$m" != "" ] || continue
+    MONITOR="$m"
+    if [ "$TRAY_HOST" != 'none' ] && [ "$m" = "$TRAY_HOST" ]; then
+      MODULES_RIGHT="tray ${modules_base}"
+    else
+      MODULES_RIGHT="$modules_base"
+    fi
+    export MONITOR MODULES_RIGHT
+    polybar -c "$config" "$BAR" </dev/null >/dev/null 2>&1 &
+  done
+}
+
+main "$@"

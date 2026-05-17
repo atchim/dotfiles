@@ -1,0 +1,93 @@
+#!/bin/sh
+
+# polybar-cpu — emit a microchip glyph coloured by aggregate CPU load.
+#
+# Samples /proc/stat, compares against the previous sample stashed in
+# $XDG_RUNTIME_DIR, and prints the glyph wrapped in a polybar colour-tag.
+# The percentage is persisted to a sibling file so polybar-notify can recall
+# it for the bar's click-action.
+#
+# Severity gating (from Oil 8):
+#   <50%   chinese-green   safe
+#   50-79  macaroni-and-cheese   warn
+#   >=80   english-red   alert
+#
+# The colour-only encoding is the bar-side half of the "wordless status"
+# convention; click-actions surfaced through polybar-notify are the
+# detail-on-demand half. See dot_config/polybar/CONVENTIONS.md.
+
+set -eu
+
+readonly STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}"
+# Per-monitor state so multiple polybar instances (one per connected
+# monitor) don't race on the same files. MONITOR is exported by
+# polybar-launch; when unset (manual debug run) the suffix collapses away.
+readonly SAMPLE="${STATE_DIR}/polybar-cpu${MONITOR:+.${MONITOR}}.sample"
+readonly PERCENT="${STATE_DIR}/polybar-cpu${MONITOR:+.${MONITOR}}.pct"
+
+# Oil 8 hex literals — kept here because polybar's colour-tag protocol takes
+# hex, not the colour names available to .ini files via ${oil8.*}.
+readonly COLOR_SAFE='#d4e05c'
+readonly COLOR_WARN='#fab98a'
+readonly COLOR_ALERT='#aa3c55'
+
+GLYPH=$(printf '\xef\x8b\x9b')
+readonly GLYPH
+
+# Print "idle total" for the aggregate `cpu` line of /proc/stat.
+sample() {
+  awk '
+    /^cpu / {
+      total = 0
+      for (i = 2; i <= NF; i++) total += $i
+      idle = $5 + $6
+      printf "%d %d\n", idle, total
+      exit
+    }
+  ' /proc/stat
+}
+
+main() {
+  curr=$(sample)
+  if [ -r "$SAMPLE" ]; then
+    prev=$(cat -- "$SAMPLE")
+  else
+    prev="$curr"
+  fi
+  printf '%s\n' "$curr" >"$SAMPLE"
+
+  # Intentional word-splitting to read the two integers from each sample.
+  # Defaults guard against a torn read (truncated state file) leaving $1/$2
+  # unset under `set -u`; the resulting zero deltas just yield pct=0 for one
+  # interval, which is recoverable on the next tick. Shellharden disabled
+  # for this file in .pre-commit-config.yaml because its quoting suggestion
+  # would collapse the split into a single positional argument.
+  # shellcheck disable=SC2086
+  set -- $prev
+  prev_idle=${1:-0}
+  prev_total=${2:-0}
+  # shellcheck disable=SC2086
+  set -- $curr
+  curr_idle=${1:-0}
+  curr_total=${2:-0}
+
+  idle_delta=$((curr_idle - prev_idle))
+  total_delta=$((curr_total - prev_total))
+  if [ "$total_delta" -le 0 ]; then
+    pct=0
+  else
+    pct=$(((100 * (total_delta - idle_delta)) / total_delta))
+  fi
+  printf '%d\n' "$pct" >"$PERCENT"
+
+  if [ "$pct" -ge 80 ]; then
+    color="$COLOR_ALERT"
+  elif [ "$pct" -ge 50 ]; then
+    color="$COLOR_WARN"
+  else
+    color="$COLOR_SAFE"
+  fi
+  printf '%%{F%s}%s%%{F-}\n' "$color" "$GLYPH"
+}
+
+main "$@"

@@ -8,6 +8,8 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io).
 - **Alacritty** — `~/.config/alacritty/alacritty.toml`
 - **bspwm** — `~/.config/bspwm/` (modular `conf.d/`; dual-monitor aware)
 - **Fish** — `~/.config/fish/`
+- **Polybar** — `~/.config/polybar/` (`bars/skeleton.ini` chassis,
+  per-bar configs under `bars/`, hardware-conditional modules)
 - **qutebrowser** — `~/.config/qutebrowser/`
 - **Starship** — `~/.config/starship.toml`
 - **sxhkd** — `~/.config/sxhkd/` (general + bspwm-specific bindings)
@@ -18,6 +20,13 @@ Helper scripts at `~/.local/bin/`:
 
 - `bspwm-monitor` — reconciles bspwm + xrandr to the live monitor topology.
 - `bspwm-monitor-event` — srandrd callback; runs `bspwm-monitor reconcile`.
+- `polybar-launch` — `polybar-launch [-p top|bottom] [-t primary|<out>|none]
+<bar>`. Spawns one polybar instance of `bars/<bar>.ini` per connected
+  monitor.
+- `polybar-cpu` — `custom/script` helper that emits a CPU-load-coloured
+  microchip glyph for the polybar cpu module.
+- `polybar-notify` — backs every status module's `click-left`; pops a
+  `notify-send` bubble with the precise reading.
 
 ## Prerequisites
 
@@ -58,6 +67,42 @@ The bspwm config drives a dual-monitor (`eDP` + one external) layout via
 Border + presel-feedback colors are sourced live from the
 [Oil 8](https://github.com/atchim/oil8) theme, which chezmoi pulls into
 `~/.local/share/oil8` (see `.chezmoiexternal.toml`).
+
+### Polybar
+
+- [polybar](https://polybar.github.io) — `x11-misc/polybar` built with
+  USE flags `+ipc +alsa +network` (polybar-msg, internal/alsa for the
+  volume module, internal/network for the wifi module). `+pulseaudio`
+  is intentionally off — this system is ALSA-focused.
+- [Hack Nerd Font Mono](https://www.nerdfonts.com) — secondary font in
+  the bar's stack. siji (`Wuncon Siji` upstream) is primary; auto-pulled
+  by `.chezmoiexternal.toml` to `~/.local/share/fonts/siji.pcf`, with
+  `dot_config/fontconfig/conf.d/30-allow-siji.conf` whitelisting it
+  against Gentoo's default bitmap-font blacklist.
+- Hardware is probed at launch (`/sys/class/power_supply`,
+  `/sys/class/backlight`, `/sys/class/net`); modules whose hardware is
+  absent are omitted from `modules-right`. See
+  `docs/adr/0002-runtime-hardware-detection.md`.
+
+Polybar is launched manually (e.g. `polybar-launch -t eDP bspwm`) — bspwm
+and sxhkd no longer chain it. `super + b` toggles visibility; `super +
+ctrl + l ; b` restarts in place. A future `sx` session orchestrator will
+glue bspwm + sxhkd + polybar + dunst + … into one startup.
+
+Click-actions on the bar use `notify-send` to surface the precise reading
+of each status module (see `dot_config/polybar/CONVENTIONS.md` — _Wordless
+Status_). They need:
+
+- [libnotify](https://gitlab.gnome.org/GNOME/libnotify) —
+  `x11-libs/libnotify`. Provides `notify-send`.
+- A notification daemon (the planned [dunst](https://dunst-project.org)
+  setup, `x11-misc/dunst`) to render the bubbles.
+- [wireless-tools](https://hewlettpackard.github.io/wireless-tools/) —
+  `net-wireless/wireless-tools`. Provides `iwgetid` for the wifi
+  click-action.
+- [alsa-utils](https://alsa-project.org/wiki/Main_Page) —
+  `media-sound/alsa-utils`. Provides `amixer` for the volume click-action
+  and `alsamixer` (bound to `super + space ; m`).
 
 ## Installation
 

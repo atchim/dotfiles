@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# polybar-notify — pop a notify-send bubble with a status module's value.
+#
+# One helper per click-action across the bar. Consolidating into a single
+# script avoids four near-identical one-liner helpers and keeps the
+# escape-cascade away from polybar's ini parser.
+#
+# Subcommands:
+#   battery     reads /sys/class/power_supply/$BAT/capacity
+#   backlight   computes percent from $BACKLIGHT brightness vs max_brightness
+#   cpu         reads the percent stashed by polybar-cpu
+#   volume      parses `amixer get Master`
+#   wifi        reads SSID via `iwgetid -r`
+
+set -eu
+
+readonly STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}"
+
+main() {
+  case "${1-}" in
+    battery)
+      v=$(cat -- "/sys/class/power_supply/${BAT-}/capacity" 2>/dev/null || true)
+      notify-send 'Battery' "${v:-?}%"
+      ;;
+    backlight)
+      b=$(cat -- "/sys/class/backlight/${BACKLIGHT-}/brightness" 2>/dev/null || true)
+      m=$(cat -- "/sys/class/backlight/${BACKLIGHT-}/max_brightness" 2>/dev/null || true)
+      if [ "$b" != "" ] && [ "$m" != "" ] && [ "$m" -gt 0 ]; then
+        notify-send 'Brightness' "$((b * 100 / m))%"
+      else
+        notify-send 'Brightness' '?'
+      fi
+      ;;
+    cpu)
+      # Matches polybar-cpu's per-monitor state path.
+      file="${STATE_DIR}/polybar-cpu${MONITOR:+.${MONITOR}}.pct"
+      pct=0
+      if [ -r "$file" ]; then
+        pct=$(cat -- "$file")
+      fi
+      notify-send 'CPU usage' "${pct}%"
+      ;;
+    volume)
+      v=$(amixer get Master 2>/dev/null | awk -F'[][]' '/%/{ print $2; exit }')
+      notify-send 'Volume' "${v:-?}"
+      ;;
+    wifi)
+      ssid=$(iwgetid -r 2>/dev/null || true)
+      notify-send 'Network' "${ssid:-disconnected}"
+      ;;
+    '')
+      printf 'polybar-notify: missing module name\n' >&2
+      exit 2
+      ;;
+    *)
+      printf 'polybar-notify: unknown module: %s\n' "$1" >&2
+      exit 2
+      ;;
+  esac
+}
+
+main "$@"

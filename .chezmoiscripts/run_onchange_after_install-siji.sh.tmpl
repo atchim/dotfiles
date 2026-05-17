@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Refresh fontconfig's cache so siji becomes discoverable after the
+# chezmoiexternal pull places siji.pcf in ~/.local/share/fonts/.
+# Re-runs whenever the source URL below changes, which is the proxy for
+# "siji install changed."
+#
+# siji-source: {{ "https://raw.githubusercontent.com/stark/siji/master/pcf/siji.pcf" }}
+
+set -eu
+
+if ! command -v fc-cache >/dev/null 2>&1; then
+  printf 'install-siji: fc-cache not installed; skipping.\n' >&2
+  exit 0
+fi
+
+fc-cache -f "${HOME}/.local/share/fonts"
