@@ -43,6 +43,27 @@ The first non-`eDP` connected output. By convention it is xrandr-primary
 when present, but is _not_ the tray host (see ADR-0001).
 _Avoid_: secondary, monitor 2
 
+**Layer**:
+The owner of an autostart. Two values: **session layer** (owned by
+`sx`) and **WM layer** (owned by `bspwmrc`). The boundary is identity,
+not runtime ordering: a session-layer autostart is one whose identity
+is WM-agnostic (sxhkd, srandrd, dunst), even if it happens to be
+configured for bspwm.
+_Avoid_: piece, component, tier
+
+**WM**:
+The window manager mounted inside a session — bspwm today, potentially
+others later. `sx <wm>` picks which one. Distinct from "session": a
+session is the whole X bring-up (session-layer autostarts + a WM); a
+WM is just the WM. Reserved CLI vocabulary: `<wm>`, not `<sesh>`.
+_Avoid_: session (means the whole layer), sesh
+
+**Autostart**:
+A program launched as part of bringing the session up. May be a daemon
+(sxhkd, dunst), a one-shot (fehbg, `bspwm-monitor reconcile`), or a
+watcher (srandrd). Each autostart lives in exactly one Layer.
+_Avoid_: service, process, startup task
+
 ## Relationships
 
 - A **Topology** has one **Laptop output** and zero or one **External
@@ -52,6 +73,8 @@ _Avoid_: secondary, monitor 2
 - Each connected output gets one **Bar instance**; exactly one of them is
   the **Tray host**.
 - **Hardware probes** run inside reconcilers, never inside config files.
+- Every **Autostart** belongs to exactly one **Layer**: the session
+  layer (mounted by `sx`) or the WM layer (mounted by `bspwmrc`).
 
 ## Example dialogue
 

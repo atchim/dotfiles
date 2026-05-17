@@ -1,0 +1,98 @@
+#!/bin/sh
+
+# sxrc — mount an X session: launch session-layer autostarts then exec a WM.
+#
+# Usage:
+#   sx                       Mount the default WM ("bspwm").
+#   sx -c <cmd> [<arg>...]   Exec <cmd> with <arg>s (escape hatch).
+#   sx [--] <wm>             Mount <wm>. Currently only "bspwm".
+#   sx -h, --help            Print this help.
+#
+# Layers:
+#   - Session layer (mounted here): WM-agnostic autostarts — sxhkd, srandrd,
+#     polybar-launch, ~/.fehbg.
+#   - WM layer (owned by bspwmrc): bspwm-stack programs only (bspwm-monitor).
+#   SEE: repo-root `CONTEXT.md` (Layer entry); `docs/adr/0003-*.md`.
+
+set -eu
+
+readonly DEFAULT_WM='bspwm'
+
+# Print usage to stdout.
+help() {
+  cat - <<EOF
+sxrc
+start X session
+
+USAGE
+  sx
+  sx -h
+  sx -c <cmd> [<arg>...]
+  sx [--] <wm>
+
+FLAGS
+      --      treat next argument as positional
+  -h  --help  print this help message and exit
+
+OPTIONS
+  -c  --cmd  <cmd> [<arg>...]  exec <cmd> with <arg>s instead of mounting a WM
+
+POSITIONAL ARGUMENTS
+  <wm>  window manager to mount; currently only "bspwm"
+
+If executed with no arguments, "${DEFAULT_WM}" is used as the WM to mount.
+EOF
+}
+
+# Print an error to stderr.
+err() { printf 'sx: %s\n' "$*" >&2; }
+
+# Print the optional error, then exit non-zero.
+die() {
+  [ "$#" -gt 0 ] && err "$@"
+  exit 1
+}
+
+# Mount the bspwm WM: launch session-layer autostarts, then exec bspwm.
+bspwm() {
+  _sxhkd_dir="${XDG_CONFIG_HOME:-$HOME/.config}/sxhkd"
+  [ -x "$HOME/.fehbg" ] && "$HOME/.fehbg" &
+  sxhkd -c "${_sxhkd_dir}/sxhkdrc" "${_sxhkd_dir}/bspwm.sxhkdrc" &
+  srandrd -n bspwm-monitor-event &
+  polybar-launch -t eDP bspwm &
+  unset _sxhkd_dir
+  exec bspwm
+}
+
+# Dispatch to the named WM's mount function.
+dispatch_wm() {
+  case "$1" in
+    bspwm) bspwm ;;
+    *) die "invalid value for <wm>: $1" ;;
+  esac
+}
+
+# Parse args, then either exec the custom command or mount a WM.
+main() {
+  case "${1-}" in
+    '') dispatch_wm "$DEFAULT_WM" ;;
+    -h | --help)
+      help
+      exit 0
+      ;;
+    -c | --cmd)
+      shift
+      [ "$#" -gt 0 ] || die '<cmd> not given'
+      exec "$@"
+      ;;
+    --)
+      shift
+      [ "$#" -gt 0 ] || die '<wm> not given'
+      dispatch_wm "$1"
+      ;;
+    -*) die "invalid argument: $1" ;;
+    *) dispatch_wm "$1" ;;
+  esac
+}
+
+main "$@"

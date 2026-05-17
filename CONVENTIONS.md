@@ -189,6 +189,39 @@ c.hints.border = f"1px solid {p['chinese_green']}"
 // --- User Authentication --------------------------------------------------
 ```
 
+## Config Directories
+
+### `xxx.d/` — Source-in-Order Fragments
+
+A `conf.d/`-style directory earns its place when **a config has
+multiple distinct concerns that share a non-trivial load order**. The
+numeric prefix is doing real work — it encodes a dependency that can't
+live in alphabetical filenames.
+
+```text
+dot_config/bspwm/conf.d/
+├── 00-options.sh    # bspc config knobs (must precede rules)
+├── 10-colors.sh     # independent of the rest
+├── 20-rules.sh      # may reference options
+└── 30-autostart.sh  # last; depends on the rest being applied
+```
+
+Without that ordering pressure, prefer a single file. Examples in this
+repo:
+
+- bspwm — split. Four concerns with real ordering. `.d` earns it.
+- sx — single file. Parse-then-dispatch; no tiers.
+- qutebrowser — single file. Flat config, no ordering.
+
+### Named Subdirectories Are a Different Pattern
+
+Named subdirectories (e.g., `polybar/bars/`, `polybar/modules/`) encode
+a **data model** — one file per bar, one per module — not a load order.
+They are not `.d`, and the rule above doesn't constrain them. Reach for
+named subdirectories when the config has multiple instances of the same
+kind of thing; reach for `.d` when one logical config has multiple
+ordering-dependent tiers.
+
 ## Per-Language
 
 Formatting and lint rules live in `.editorconfig` and
