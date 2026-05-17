@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# topology-event — srandrd callback fired on every X RANDR topology change.
+#
+# Reconcilers (fired in order):
+#   bspwm-monitor reconcile      WM-layer; applies xrandr position and bspc
+#                                desktops to the live topology.
+#   polybar-launch -t eDP bspwm  Session-layer; (re)spawns one polybar per
+#                                connected output, with eDP as tray host.
+#
+# Order matters: the WM reconciler updates xrandr before polybar binds.
+# Both reconcilers are idempotent and read live state, so this callback
+# does not dispatch on event type.
+
+set -eu
+
+bspwm-monitor reconcile
+exec polybar-launch -t eDP bspwm

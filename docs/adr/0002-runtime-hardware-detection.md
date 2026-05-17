@@ -16,4 +16,6 @@ USB wifi dongle adds an interface. Hotplug-friendliness matters more
 than chezmoi-nativeness, and the existing `bspwm-monitor` reconciler
 already pioneered this same runtime-probe pattern for the bspwm side.
 `polybar-launch` is its polybar-side counterpart and is invoked from
-the same hotplug callback (`bspwm-monitor-event`).
+the topology hotplug callback (`topology-event`), alongside
+`bspwm-monitor reconcile`. The callback lives in `dot_local/bin/`
+and is wired into srandrd by `sx`.

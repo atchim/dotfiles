@@ -31,21 +31,19 @@ _when_ they need to run, not their alphabetical name.
 Each `conf.d/*.sh` opens with `# shellcheck shell=sh` — they're sourced
 under POSIX, not bash.
 
-## Helper-Script Pair
+## Worker, Not Event Loop
 
-Monitor reconciliation is split across two scripts in `dot_local/bin/`:
+`bspwm-monitor` is the WM-layer worker — topology rules and reconcile
+logic, idempotent, callable manually for debugging or one-off fix-ups.
+It does not own its own event loop.
 
-- `bspwm-monitor` — the worker. Holds the topology rules and the
-  reconcile logic. Idempotent; can be invoked from anywhere.
-- `bspwm-monitor-event` — the srandrd callback. Receives the X RANDR
-  event, ignores it (reconciliation reads live state), and calls
-  `bspwm-monitor reconcile`.
-
-The split is deliberate: the worker is callable manually (debugging, one-off
-fix-ups), the callback is wired into the X RANDR event loop. Keeping the
-event handler trivial means topology logic only needs to be tested in one
-place.
+The X RANDR event loop lives in `dot_local/bin/topology-event`, a
+layer-neutral srandrd callback wired by `sx`. The callback fires both
+reconcilers in order: `bspwm-monitor reconcile` (WM-layer) and then
+`polybar-launch` (session-layer). Keeping the event handler trivial
+means topology logic only needs to be tested in one place. See
+repo-root `CONTEXT.md` for the **Hotplug event** definition.
 
 `bspwm-monitor` exposes subcommands as aliases of `reconcile`
-(`init`, `attach`, `detach`) so the autostart hook and the hotplug callback
-can name their intent without branching the worker's logic.
+(`init`, `attach`, `detach`) so the autostart hook and the hotplug
+callback can name their intent without branching the worker's logic.

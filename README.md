@@ -19,7 +19,8 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io).
 Helper scripts at `~/.local/bin/`:
 
 - `bspwm-monitor` — reconciles bspwm + xrandr to the live monitor topology.
-- `bspwm-monitor-event` — srandrd callback; runs `bspwm-monitor reconcile`.
+- `topology-event` — srandrd callback; runs `bspwm-monitor reconcile`
+  and `polybar-launch -t eDP bspwm` on every X RANDR change.
 - `polybar-launch` — `polybar-launch [-p top|bottom] [-t primary|<out>|none]
 <bar>`. Spawns one polybar instance of `bars/<bar>.ini` per connected
   monitor.
@@ -62,7 +63,7 @@ The bspwm config drives a dual-monitor (`eDP` + one external) layout via
 - [xrandr](https://gitlab.freedesktop.org/xorg/app/xrandr) — `x11-apps/xrandr`.
   Required for the monitor reconcile script.
 - [srandrd](https://github.com/jceb/srandrd) — watches X RANDR events and runs
-  `bspwm-monitor-event` on every monitor hotplug.
+  `topology-event` on every monitor hotplug. Wired into srandrd by `sx`.
 
 Border + presel-feedback colors are sourced live from the
 [Oil 8](https://github.com/atchim/oil8) theme, which chezmoi pulls into
@@ -84,10 +85,10 @@ Border + presel-feedback colors are sourced live from the
   absent are omitted from `modules-right`. See
   `docs/adr/0002-runtime-hardware-detection.md`.
 
-Polybar is launched manually (e.g. `polybar-launch -t eDP bspwm`) — bspwm
-and sxhkd no longer chain it. `super + b` toggles visibility; `super +
-ctrl + l ; b` restarts in place. A future `sx` session orchestrator will
-glue bspwm + sxhkd + polybar + dunst + … into one startup.
+Polybar is launched by `sx` (the session-layer mounter) at session start
+and relaunched on every X RANDR change via the `topology-event` callback.
+`super + b` toggles visibility; `super + ctrl + l ; b` restarts in place.
+See `docs/adr/0003-session-layer-autostarts-in-sx.md` for the split.
 
 Click-actions on the bar use `notify-send` to surface the precise reading
 of each status module (see `dot_config/polybar/CONVENTIONS.md` — _Wordless
