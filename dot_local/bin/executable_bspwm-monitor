@@ -167,6 +167,27 @@ reconcile_detach() {
   set_laptop_desktops
 }
 
+# Resync each managed window's _NET_WM_DESKTOP to its desktop's index.
+sync_ewmh_desktop() {
+  # bspc moves keep internal state correct but leave the X11 property stale
+  # on cross-monitor moves; rofi -modi window and other EWMH consumers show
+  # 'n/a' otherwise. bspc emits desktops in the same order bspwm uses for
+  # _NET_DESKTOP_NAMES, so NR-1 is the correct 0-based global index.
+  command -v xprop >/dev/null 2>&1 || return 0
+  map=$(bspc query -D --names 2>/dev/null | awk 'NF { print $0 "\t" NR - 1 }')
+  [ "$map" != "" ] || return 0
+  bspc query -N --node .window 2>/dev/null | while read -r node; do
+    [ "$node" != "" ] || continue
+    d=$(bspc query -D -n "$node" --names 2>/dev/null)
+    [ "$d" != "" ] || continue
+    idx=$(printf '%s\n' "$map" \
+      | awk -F'\t' -v name="$d" '$1 == name { print $2; exit }')
+    [ "$idx" != "" ] || continue
+    xprop -id "$node" -f _NET_WM_DESKTOP 32c \
+      -set _NET_WM_DESKTOP "$idx" >/dev/null 2>&1 || true
+  done
+}
+
 reconcile() {
   if ! command -v xrandr >/dev/null 2>&1; then
     printf 'bspwm-monitor: xrandr not installed; cannot reconcile.\n' >&2
@@ -178,6 +199,7 @@ reconcile() {
   else
     reconcile_detach
   fi
+  sync_ewmh_desktop
 }
 
 # Get or set the external's cardinal direction relative to the laptop.

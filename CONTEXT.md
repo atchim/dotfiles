@@ -64,6 +64,16 @@ A program launched as part of bringing the session up. May be a daemon
 watcher (srandrd). Each autostart lives in exactly one Layer.
 _Avoid_: service, process, startup task
 
+**EWMH state**:
+The X11 properties that surface bspwm's structure to other clients —
+`_NET_DESKTOP_NAMES`, `_NET_WM_DESKTOP`, `_NET_CLIENT_LIST`. bspwm
+updates these on most operations, but `_NET_WM_DESKTOP` drifts when a
+node is moved across monitors and then the source monitor is removed.
+`bspwm-monitor`'s `sync_ewmh_desktop` patches the drift after each
+reconcile so EWMH consumers (rofi -modi window, wmctrl) see correct
+desktop names instead of `n/a`.
+_Avoid_: window state (collides with bspwm's per-node tiling state)
+
 ## Relationships
 
 - A **Topology** has one **Laptop output** and zero or one **External
@@ -75,6 +85,8 @@ _Avoid_: service, process, startup task
 - **Hardware probes** run inside reconcilers, never inside config files.
 - Every **Autostart** belongs to exactly one **Layer**: the session
   layer (mounted by `sx`) or the WM layer (mounted by `bspwmrc`).
+- Reconcilers must keep **EWMH state** in agreement with bspwm's
+  internal state when they move nodes across monitors.
 
 ## Example dialogue
 
