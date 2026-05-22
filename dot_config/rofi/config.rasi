@@ -1,5 +1,8 @@
 configuration {
   font: "Hack Nerd Font Mono 9";
+  // Follow keyboard focus instead of mouse position.
+  // SEE: rofi(1) -m
+  monitor: -1;
 }
 
 @theme "board"
