@@ -7,6 +7,7 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io).
 - **Bash** — `~/.bash_profile`, `~/.bashrc`
 - **Alacritty** — `~/.config/alacritty/alacritty.toml`
 - **bspwm** — `~/.config/bspwm/` (modular `conf.d/`; dual-monitor aware)
+- **dunst** — `~/.config/dunst/` (oil8 theme via `dunstrc.d/` drop-in)
 - **Fish** — `~/.config/fish/`
 - **Polybar** — `~/.config/polybar/` (`bars/skeleton.ini` chassis,
   per-bar configs under `bars/`, hardware-conditional modules)
@@ -96,8 +97,9 @@ Status_). They need:
 
 - [libnotify](https://gitlab.gnome.org/GNOME/libnotify) —
   `x11-libs/libnotify`. Provides `notify-send`.
-- A notification daemon (the planned [dunst](https://dunst-project.org)
-  setup, `x11-misc/dunst`) to render the bubbles.
+- [dunst](https://dunst-project.org) — `x11-misc/dunst`. Notification
+  daemon that renders the bubbles; autostarted by `sx`, themed via the
+  `dunstrc.d/oil8.conf` drop-in symlinked to `~/.local/share/oil8/dunst/`.
 - [wireless-tools](https://hewlettpackard.github.io/wireless-tools/) —
   `net-wireless/wireless-tools`. Provides `iwgetid` for the wifi
   click-action.

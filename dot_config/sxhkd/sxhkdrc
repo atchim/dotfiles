@@ -42,3 +42,7 @@ super + ctrl + l ; s
 # re-probe hardware — for that, re-run polybar-launch).
 super + ctrl + l ; b
   polybar-msg cmd restart
+
+# Restart dunst in place (no SIGUSR signal exists; kill + respawn).
+super + ctrl + l ; d
+  pkill dunst; dunst &

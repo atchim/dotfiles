@@ -57,6 +57,7 @@ die() {
 bspwm() {
   _sxhkd_dir="${XDG_CONFIG_HOME:-$HOME/.config}/sxhkd"
   [ -x "$HOME/.fehbg" ] && "$HOME/.fehbg" &
+  dunst &
   sxhkd -c "${_sxhkd_dir}/sxhkdrc" "${_sxhkd_dir}/bspwm.sxhkdrc" &
   srandrd -n topology-event &
   polybar-launch -t eDP bspwm &
