@@ -273,7 +273,9 @@ sourced `.sh` file.
 ### Bash
 
 Bash is a superset of POSIX shell; every rule under `Shell` applies.
-Prefer `#!/bin/sh` unless you specifically need a bash extension.
+Prefer `#!/bin/sh` unless you specifically need a bash extension. Needing a
+bash extension includes cases where shellharden mangles a valid POSIX idiom
+— see Tooling Friction.
 
 - Use `[[ ... ]]` over `[ ... ]` for tests. No word-splitting pitfalls,
   supports pattern and regex matching.
@@ -294,6 +296,26 @@ Prefer `#!/bin/sh` unless you specifically need a bash extension.
   Plain bold for terms, even definitional ones — no italic-and-bold
   combinations.
 - Code fences carry a language tag (` ```python `), never bare.
+
+## Tooling Friction
+
+When a pre-commit check (linter, style, or security scanner) flags code that
+is correct and intentional, prefer this hierarchy:
+
+1. **Rewrite to satisfy both the tool and the intent.** Most warnings point
+   at a refactor that loses nothing.
+2. **Escalate to a more expressive shell or language**, where the idiom is
+   first-class. Bash arrays, for instance, make explicit what POSIX
+   `set -- $var` expresses through word-splitting — and shellharden
+   accepts the bash form without complaint. "Specifically needs a bash
+   extension" (see Bash section) covers this case.
+3. **Exclude the file from the tool**, with a comment in the tool's config
+   citing the conflict and the chosen workaround. Last resort: excludes
+   are file-wide, so the tool stops covering anything else in that file.
+
+Short-circuit allowed: if steps 1–2 would damage readability or idiom — the
+cure worse than the disease — skip to step 3. Don't twist code into knots
+to keep a linter quiet.
 
 ## Vim Modeline
 
