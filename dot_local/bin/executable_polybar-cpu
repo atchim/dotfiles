@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # polybar-cpu — emit a microchip glyph coloured by aggregate CPU load.
 #
@@ -56,33 +56,24 @@ main() {
   fi
   printf '%s\n' "$curr" >"$SAMPLE"
 
-  # Intentional word-splitting to read the two integers from each sample.
-  # Defaults guard against a torn read (truncated state file) leaving $1/$2
-  # unset under `set -u`; the resulting zero deltas just yield pct=0 for one
-  # interval, which is recoverable on the next tick. Shellharden disabled
-  # for this file in .pre-commit-config.yaml because its quoting suggestion
-  # would collapse the split into a single positional argument.
-  # shellcheck disable=SC2086
-  set -- $prev
-  prev_idle=${1:-0}
-  prev_total=${2:-0}
-  # shellcheck disable=SC2086
-  set -- $curr
-  curr_idle=${1:-0}
-  curr_total=${2:-0}
+  # A torn read (truncated state file) leaves the trailing var empty; bash
+  # arithmetic treats empty as 0, so the resulting zero delta yields pct=0
+  # for one interval — recoverable on the next tick.
+  read -r prev_idle prev_total <<<"$prev"
+  read -r curr_idle curr_total <<<"$curr"
 
   idle_delta=$((curr_idle - prev_idle))
   total_delta=$((curr_total - prev_total))
-  if [ "$total_delta" -le 0 ]; then
+  if [[ $total_delta -le 0 ]]; then
     pct=0
   else
     pct=$(((100 * (total_delta - idle_delta)) / total_delta))
   fi
   printf '%d\n' "$pct" >"$PERCENT"
 
-  if [ "$pct" -ge 80 ]; then
+  if [[ $pct -ge 80 ]]; then
     color="$COLOR_ALERT"
-  elif [ "$pct" -ge 50 ]; then
+  elif [[ $pct -ge 50 ]]; then
     color="$COLOR_WARN"
   else
     color="$COLOR_SAFE"
