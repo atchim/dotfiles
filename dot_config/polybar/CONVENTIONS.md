@@ -97,25 +97,17 @@ codepoints in a v3 environment.
 
 Verified siji codepoints used in this config:
 
-<!-- editorconfig-checker-disable -->
-
 - `terminal_big` — U+E1EF — `tty` workspace icon
 - `wifi_1..wifi_5` — U+E258..U+E25C — wifi `ramp-signal` (5 levels)
 - `w_sun` — U+E234 — backlight ramp
 
-<!-- editorconfig-checker-enable -->
-
 Everything else falls to Nerd Font v3 via `font-1`:
-
-<!-- editorconfig-checker-disable -->
 
 1. FontAwesome (`nf-fa-*`, U+F000–U+F2FF) — battery ramp (U+F240..U+F244),
    bolt (U+F0E7), volume (U+F026..U+F028), browse globe (U+F0AC), misc
    cube (U+F1B2), bspwm layout/state glyphs.
 2. Material Design (`nf-md-*`, U+F0001+) — only when FA lacks the
    semantic (e.g. `nf-md-view_dashboard_outline` for pseudotiled).
-
-<!-- editorconfig-checker-enable -->
 
 Never emoji, never `Unifont`. The old dotsoup config used emojis for
 non-siji glyphs (moon-phase backlight, globe/dice workspaces) and they

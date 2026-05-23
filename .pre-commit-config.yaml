@@ -105,6 +105,11 @@ repos:
     rev: 3.6.1
     hooks:
       - id: editorconfig-checker
+        # Markdown formatting is owned by prettier, which uses its own
+        # indent conventions (3-space list continuation under `1. `) that
+        # editorconfig-checker rejects as not-a-multiple-of-2. Final newline
+        # and trailing whitespace are still covered by pre-commit-hooks.
+        exclude: \.md$
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
     hooks:
