@@ -60,6 +60,7 @@ bspwm() {
   dunst &
   sxhkd -c "${_sxhkd_dir}/sxhkdrc" "${_sxhkd_dir}/bspwm.sxhkdrc" &
   srandrd -n topology-event &
+  audio-jack-monitor watch &
   polybar-launch -t eDP bspwm &
   unset _sxhkd_dir
   exec bspwm
