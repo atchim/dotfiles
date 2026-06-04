@@ -1,4 +1,4 @@
-from _types import ConfigAPI, ConfigContainer
+from _qute_types import ConfigAPI, ConfigContainer
 
 _DEFAULT = ';;'.join(
   [

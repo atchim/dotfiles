@@ -31,11 +31,15 @@ two steps — drop a `{name}.py` exposing `setup`, append `'name'` to
 ## Shared Type Aliases
 
 Type aliases for the qutebrowser-injected `c` and `config` globals live in
-`_types.py` and are imported by every domain module:
+`_qute_types.py` and are imported by every domain module:
 
 ```python
-from _types import ConfigAPI, ConfigContainer
+from _qute_types import ConfigAPI, ConfigContainer
 ```
 
-`_types.py` exposes its surface via `__all__`. Domain modules never import
+`_qute_types.py` exposes its surface via `__all__`. Domain modules never import
 qutebrowser's internal modules directly — they only see the aliases.
+
+The name avoids `_types`: Python 3.14 ships a built-in `_types` module, and
+built-in finders run before the path finder, so a local `_types.py` would be
+shadowed (`cannot import name 'ConfigAPI' from '_types'`).
