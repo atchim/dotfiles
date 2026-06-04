@@ -150,7 +150,7 @@ Status modules speak through two channels — never through text:
 - **Glyph shape** encodes level when a graded glyph exists. The battery
   ramp has three capacity icons, the volume ramp has mute/low/high.
 - **Foreground colour** encodes severity:
-  - `${oil8.chinese-green}` — safe / full / good
+  - `${oil8.mantis}` — safe / full / good
   - default foreground (`${oil8.bone}`) — normal
   - `${oil8.macaroni-and-cheese}` — warn
   - `${oil8.brink-pink}` — alert / depleted / disconnected
