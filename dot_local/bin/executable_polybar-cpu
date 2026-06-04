@@ -7,10 +7,10 @@
 # The percentage is persisted to a sibling file so polybar-notify can recall
 # it for the bar's click-action.
 #
-# Severity gating (from Oil 8):
-#   <50%   chinese-green   safe
-#   50-79  macaroni-and-cheese   warn
-#   >=80   english-red   alert
+# Severity gating (from Oil 8; chinese-green is the palette's bright yellow):
+#   <50%   bone            safe
+#   50-79  brink-pink      warn
+#   >=80   chinese-green   alert
 #
 # The colour-only encoding is the bar-side half of the "wordless status"
 # convention; click-actions surfaced through polybar-notify are the
@@ -27,9 +27,9 @@ readonly PERCENT="${STATE_DIR}/polybar-cpu${MONITOR:+.${MONITOR}}.pct"
 
 # Oil 8 hex literals — kept here because polybar's colour-tag protocol takes
 # hex, not the colour names available to .ini files via ${oil8.*}.
-readonly COLOR_SAFE='#d4e05c'
-readonly COLOR_WARN='#fab98a'
-readonly COLOR_ALERT='#aa3c55'
+readonly COLOR_SAFE='#e1e0c4'
+readonly COLOR_WARN='#f35e7c'
+readonly COLOR_ALERT='#d4e05c'
 
 GLYPH=$(printf '\xef\x8b\x9b')
 readonly GLYPH
