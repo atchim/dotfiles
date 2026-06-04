@@ -7,7 +7,6 @@
 # escape-cascade away from polybar's ini parser.
 #
 # Subcommands:
-#   battery     reads /sys/class/power_supply/$BAT/capacity
 #   backlight   computes percent from $BACKLIGHT brightness vs max_brightness
 #   cpu         reads the percent stashed by polybar-cpu
 #   volume      parses `amixer get Master`
@@ -19,10 +18,6 @@ readonly STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}"
 
 main() {
   case "${1-}" in
-    battery)
-      v=$(cat -- "/sys/class/power_supply/${BAT-}/capacity" 2>/dev/null || true)
-      notify-send 'Battery' "${v:-?}%"
-      ;;
     backlight)
       b=$(cat -- "/sys/class/backlight/${BACKLIGHT-}/brightness" 2>/dev/null || true)
       m=$(cat -- "/sys/class/backlight/${BACKLIGHT-}/max_brightness" 2>/dev/null || true)

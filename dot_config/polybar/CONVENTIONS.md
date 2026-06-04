@@ -91,7 +91,7 @@ Gentoo:
 
 siji's actual codepoint range is U+E001–U+E276, and its coverage is
 narrower than the old dotsoup config suggested — it does **not**
-contain battery or cpu glyphs. The U+E83A / U+E96x codepoints
+contain cpu glyphs. The U+E83A / U+E96x codepoints
 the old config used were Nerd Font v2's legacy Material Design Iconic
 block (U+E63E–U+EB68), which Nerd Font v3 dropped. Don't trust those
 codepoints in a v3 environment.
@@ -100,32 +100,35 @@ Verified siji codepoints used in this config. siji carries no semantic
 glyph names for most of these (the font reports bare `U+E1xx`), so they
 are identified by appearance and role:
 
-| Codepoint(s)   | Glyph              | Used for                         |
-| -------------- | ------------------ | -------------------------------- |
-| U+E1A1         | terminal/console   | `tty` / `tty.x` workspace icon   |
-| U+E1A0         | compass            | `browse` / `browse.x` icon       |
-| U+E176..U+E17C | bitmap digits 3..9 | `d3..d9` workspace labels        |
-| U+E173         | bitmap digit 0     | `d0` workspace label (10th slot) |
-| U+E136         | tiled windows      | `label-tiled` layout             |
-| U+E130         | single square      | `label-monocle` layout           |
-| U+E135         | floating windows   | `label-floating` layout          |
-| U+E13A         | pseudotiled        | `label-pseudotiled` layout       |
-| U+E1F6         | pin                | `label-sticky` node-state        |
-| U+E1E2         | bookmark           | `label-marked` node-state        |
-| U+E0A9         | eye                | `label-private` node-state       |
-| U+E258..U+E25C | signal bars        | wifi `ramp-signal` (5 levels)    |
-| U+E234         | sun                | backlight ramp                   |
-| U+E04E         | speaker, silent    | `ramp-volume-0`                  |
-| U+E204         | speaker            | `ramp-volume-1`                  |
-| U+E050         | speaker, one wave  | `ramp-volume-2`                  |
-| U+E203         | speaker, waves     | `ramp-volume-3`, `-4` (loud)     |
-| U+E04F         | speaker, muted (×) | `label-muted`                    |
+| Codepoint(s)   | Glyph              | Used for                           |
+| -------------- | ------------------ | ---------------------------------- |
+| U+E1A1         | terminal/console   | `tty` / `tty.x` workspace icon     |
+| U+E1A0         | compass            | `browse` / `browse.x` icon         |
+| U+E176..U+E17C | bitmap digits 3..9 | `d3..d9` workspace labels          |
+| U+E173         | bitmap digit 0     | `d0` workspace label (10th slot)   |
+| U+E136         | tiled windows      | `label-tiled` layout               |
+| U+E130         | single square      | `label-monocle` layout             |
+| U+E135         | floating windows   | `label-floating` layout            |
+| U+E13A         | pseudotiled        | `label-pseudotiled` layout         |
+| U+E1F6         | pin                | `label-sticky` node-state          |
+| U+E1E2         | bookmark           | `label-marked` node-state          |
+| U+E0A9         | eye                | `label-private` node-state         |
+| U+E258..U+E25C | signal bars        | wifi `ramp-signal` (5 levels)      |
+| U+E234         | sun                | backlight ramp                     |
+| U+E04E         | speaker, silent    | `ramp-volume-0`                    |
+| U+E204         | speaker            | `ramp-volume-1`                    |
+| U+E050         | speaker, one wave  | `ramp-volume-2`                    |
+| U+E203         | speaker, waves     | `ramp-volume-3`, `-4` (loud)       |
+| U+E04F         | speaker, muted (×) | `label-muted`                      |
+| U+E236         | empty battery      | `ramp-capacity-0`, `animation-low` |
+| U+E237         | battery, 1/3 fill  | `ramp-capacity-1`                  |
+| U+E238         | battery, 2/3 fill  | `ramp-capacity-2`                  |
+| U+E23A         | battery, bolt      | `format-charging`                  |
 
 Everything else falls to Nerd Font v3 via `font-1`:
 
-1. FontAwesome (`nf-fa-*`, U+F000–U+F2FF) — battery ramp (U+F240..U+F244),
-   bolt (U+F0E7), and the two bspwm node-state glyphs siji lacks:
-   fullscreen (U+F065) and locked (U+F023).
+1. FontAwesome (`nf-fa-*`, U+F000–U+F2FF) — the two bspwm node-state
+   glyphs siji lacks: fullscreen (U+F065) and locked (U+F023).
 2. Material Design (`nf-md-*`, U+F0001+) — reserved fallback for when FA
    lacks a semantic; not currently used by any module.
 
@@ -143,12 +146,13 @@ or query its charset with `fc-query -f '%{charset}\n' <file>`.
 Status modules speak through two channels — never through text:
 
 - **Glyph shape** encodes level when a graded glyph exists. The battery
-  ramp has five capacity icons, the volume ramp has mute/low/high.
+  ramp has three capacity icons, the volume ramp has mute/low/high.
 - **Foreground colour** encodes severity:
   - `${oil8.chinese-green}` — safe / full / good
   - default foreground (`${oil8.bone}`) — normal
   - `${oil8.macaroni-and-cheese}` — warn
-  - `${oil8.english-red}` — alert / depleted / disconnected
+  - `${oil8.brink-pink}` — alert / depleted / disconnected
+  - `${oil8.caput-mortuum}` — dimmed alert (off-phase of a low pulse)
   - `${oil8.cyber-grape}` — muted / dimmed / inactive
 
 Both channels run independently: a battery at 15% shows the empty-glyph
@@ -170,14 +174,19 @@ Polybar has no native tooltip mechanism. The closest substitute is
 **`click-left` fires `notify-send`** with the current reading:
 
 ```ini
-click-left = polybar-notify battery
+click-left = polybar-notify cpu
 ```
 
 `polybar-notify` (in `dot_local/bin/`) is the single helper that backs
-every module's click-left — one subcommand per module (`battery`,
-`backlight`, `cpu`, `volume`, `wifi`). Consolidating into one script
-avoids four near-identical one-liner helpers and keeps shell-escape
-cascades out of polybar's ini parser.
+every module's click-left — one subcommand per module (`backlight`,
+`cpu`, `volume`, `wifi`). Consolidating into one script avoids
+near-identical one-liner helpers and keeps shell-escape cascades out of
+polybar's ini parser.
+
+Battery is the exception: it has **no** click-action. The kernel
+`capacity` read was unreliable (the bubble showed `?%`) and
+`internal/battery` ignores a module-level `click-left` anyway, so it
+stays glyph-only.
 
 The bar stays wordless; the precise number is one click away.
 
