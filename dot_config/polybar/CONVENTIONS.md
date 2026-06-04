@@ -71,10 +71,11 @@ font-1 = Hack Nerd Font Mono:pixelsize=10;1
 ```
 
 `Wuncon Siji` (siji's upstream fontconfig family name) is listed first
-so polybar's codepoint lookup prefers its bitmap glyphs in the U+E0xx
-Private Use Area — they render crisper at the bar's small pixel size
-than Nerd Font's vector forms. `Hack Nerd Font Mono` covers Latin
-text, the bare-digit `d3..d9` workspace labels, and every Nerd Font
+so polybar's codepoint lookup prefers its bitmap glyphs in the Private
+Use Area — they render crisper at the bar's small pixel size than Nerd
+Font's vector forms. The workspace digit labels are deliberately drawn
+from siji's own bitmap digits (see below) for this reason, not from
+ASCII. `Hack Nerd Font Mono` covers Latin text and every Nerd Font
 glyph not present in siji.
 
 siji ships at `~/.local/share/fonts/siji.pcf` via
@@ -95,19 +96,33 @@ the old config used were Nerd Font v2's legacy Material Design Iconic
 block (U+E63E–U+EB68), which Nerd Font v3 dropped. Don't trust those
 codepoints in a v3 environment.
 
-Verified siji codepoints used in this config:
+Verified siji codepoints used in this config. siji carries no semantic
+glyph names for most of these (the font reports bare `U+E1xx`), so they
+are identified by appearance and role:
 
-- `terminal_big` — U+E1EF — `tty` workspace icon
-- `wifi_1..wifi_5` — U+E258..U+E25C — wifi `ramp-signal` (5 levels)
-- `w_sun` — U+E234 — backlight ramp
+| Codepoint(s)   | Glyph              | Used for                         |
+| -------------- | ------------------ | -------------------------------- |
+| U+E1A1         | terminal/console   | `tty` / `tty.x` workspace icon   |
+| U+E1A0         | compass            | `browse` / `browse.x` icon       |
+| U+E176..U+E17C | bitmap digits 3..9 | `d3..d9` workspace labels        |
+| U+E173         | bitmap digit 0     | `d0` workspace label (10th slot) |
+| U+E136         | tiled windows      | `label-tiled` layout             |
+| U+E130         | single square      | `label-monocle` layout           |
+| U+E135         | floating windows   | `label-floating` layout          |
+| U+E13A         | pseudotiled        | `label-pseudotiled` layout       |
+| U+E1F6         | pin                | `label-sticky` node-state        |
+| U+E1E2         | bookmark           | `label-marked` node-state        |
+| U+E0A9         | eye                | `label-private` node-state       |
+| U+E258..U+E25C | signal bars        | wifi `ramp-signal` (5 levels)    |
+| U+E234         | sun                | backlight ramp                   |
 
 Everything else falls to Nerd Font v3 via `font-1`:
 
 1. FontAwesome (`nf-fa-*`, U+F000–U+F2FF) — battery ramp (U+F240..U+F244),
-   bolt (U+F0E7), volume (U+F026..U+F028), browse globe (U+F0AC), misc
-   cube (U+F1B2), bspwm layout/state glyphs.
-2. Material Design (`nf-md-*`, U+F0001+) — only when FA lacks the
-   semantic (e.g. `nf-md-view_dashboard_outline` for pseudotiled).
+   bolt (U+F0E7), volume (U+F026..U+F028), and the two bspwm node-state
+   glyphs siji lacks: fullscreen (U+F065) and locked (U+F023).
+2. Material Design (`nf-md-*`, U+F0001+) — reserved fallback for when FA
+   lacks a semantic; not currently used by any module.
 
 Never emoji, never `Unifont`. The old dotsoup config used emojis for
 non-siji glyphs (moon-phase backlight, globe/dice workspaces) and they
@@ -180,14 +195,14 @@ so polybar logs no errors. See `docs/adr/0002-runtime-hardware-detection.md`.
 
 ## Workspace Icons
 
-The bspwm desktop set is `tty browse d3 d4 d5 d6 d7 d8 d9 misc` on the
-laptop and `tty.x browse.x d3.x … misc.x` on the external. Workspace
-icons map by **literal desktop name**:
+The bspwm desktop set is `tty browse d3 d4 d5 d6 d7 d8 d9 d0` on the
+laptop and `tty.x browse.x d3.x … d0.x` on the external. Workspace
+icons map by **literal desktop name**, all rendered from siji bitmaps:
 
 - `tty` / `tty.x` → terminal glyph
-- `browse` / `browse.x` → globe glyph
-- `d3..d9` / `d3.x..d9.x` → bare digit `3`..`9`
-- `misc` / `misc.x` → cube glyph
+- `browse` / `browse.x` → compass glyph
+- `d3..d9` / `d3.x..d9.x` → siji digit `3`..`9`
+- `d0` / `d0.x` → siji digit `0` (the 10th slot)
 
 `pin-workspaces = true` scopes each bar instance to its monitor's
 desktops, so the laptop bar never shows `.x` slots and vice versa.

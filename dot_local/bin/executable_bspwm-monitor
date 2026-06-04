@@ -83,14 +83,14 @@ apply_position() {
 
 # Reset desktops on the laptop monitor to the named single-monitor set.
 set_laptop_desktops() {
-  set -- tty browse d3 d4 d5 d6 d7 d8 d9 misc
+  set -- tty browse d3 d4 d5 d6 d7 d8 d9 d0
   bspc monitor "$LAPTOP" --reset-desktops "$@"
 }
 
 # Reset desktops on the external monitor to the suffixed dual-monitor set.
 set_external_desktops() {
   ext="$1"
-  set -- tty.x browse.x d3.x d4.x d5.x d6.x d7.x d8.x d9.x misc.x
+  set -- tty.x browse.x d3.x d4.x d5.x d6.x d7.x d8.x d9.x d0.x
   bspc monitor "$ext" --reset-desktops "$@"
 }
 
