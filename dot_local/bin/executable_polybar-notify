@@ -3,14 +3,13 @@
 # polybar-notify — pop a notify-send bubble with a status module's value.
 #
 # One helper per click-action across the bar. Consolidating into a single
-# script avoids four near-identical one-liner helpers and keeps the
+# script avoids near-identical one-liner helpers and keeps the
 # escape-cascade away from polybar's ini parser.
 #
 # Subcommands:
 #   backlight   computes percent from $BACKLIGHT brightness vs max_brightness
 #   cpu         reads the percent stashed by polybar-cpu
 #   volume      parses `amixer get Master`
-#   wifi        reads SSID via `iwgetid -r`
 
 set -eu
 
@@ -39,10 +38,6 @@ main() {
     volume)
       v=$(amixer get Master 2>/dev/null | awk -F'[][]' '/%/{ print $2; exit }')
       notify-send 'Volume' "${v:-?}"
-      ;;
-    wifi)
-      ssid=$(iwgetid -r 2>/dev/null || true)
-      notify-send 'Network' "${ssid:-disconnected}"
       ;;
     '')
       printf 'polybar-notify: missing module name\n' >&2
