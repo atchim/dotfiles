@@ -178,12 +178,14 @@ click-left = polybar-notify cpu
 ```
 
 `polybar-notify` (in `dot_local/bin/`) is the single helper that backs
-every module's click-left — one subcommand per module (`backlight`,
+each module's click-action — one subcommand per module (`backlight`,
 `cpu`, `volume`, `wifi`). Consolidating into one script avoids
 near-identical one-liner helpers and keeps shell-escape cascades out of
 polybar's ini parser.
 
-Battery is the exception: it has **no** click-action. The kernel
+Most modules bind it to `click-left`. Volume is on **`click-right`**,
+because `internal/alsa` reserves left-click for its built-in mute
+toggle. Battery is the exception with **no** click-action: the kernel
 `capacity` read was unreliable (the bubble showed `?%`) and
 `internal/battery` ignores a module-level `click-left` anyway, so it
 stays glyph-only.
