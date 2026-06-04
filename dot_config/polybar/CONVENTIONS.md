@@ -114,7 +114,9 @@ are identified by appearance and role:
 | U+E1E2         | bookmark           | `label-marked` node-state          |
 | U+E0A9         | eye                | `label-private` node-state         |
 | U+E258..U+E25C | signal bars        | wifi `ramp-signal` (5 levels)      |
-| U+E234         | sun                | backlight ramp                     |
+| U+E1BC         | hollow circle      | backlight `ramp-0` (low)           |
+| U+E1C3         | half-filled circle | backlight `ramp-1` (mid)           |
+| U+E1C2         | filled circle      | backlight `ramp-2` (high)          |
 | U+E04E         | speaker, silent    | `ramp-volume-0`                    |
 | U+E204         | speaker            | `ramp-volume-1`                    |
 | U+E050         | speaker, one wave  | `ramp-volume-2`                    |
