@@ -74,6 +74,13 @@ reconcile so EWMH consumers (rofi -modi window, wmctrl) see correct
 desktop names instead of `n/a`.
 _Avoid_: window state (collides with bspwm's per-node tiling state)
 
+**Alsamixer scale**:
+The perceptual (logarithmic-in-dB) volume percentage alsamixer displays —
+the canonical "volume" number in this repo. Distinct from the raw mixer
+register (`0..87` on this codec) and from amixer's dB-linear `%`. Helper
+scripts (`audio-jack-monitor`) and the polybar volume ramp target it.
+_Avoid_: volume %, raw volume, amixer %
+
 ## Relationships
 
 - A **Topology** has one **Laptop output** and zero or one **External

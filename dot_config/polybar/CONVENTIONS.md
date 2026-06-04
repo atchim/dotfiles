@@ -91,7 +91,7 @@ Gentoo:
 
 siji's actual codepoint range is U+E001–U+E276, and its coverage is
 narrower than the old dotsoup config suggested — it does **not**
-contain battery, volume, or cpu glyphs. The U+E83A / U+E96x codepoints
+contain battery or cpu glyphs. The U+E83A / U+E96x codepoints
 the old config used were Nerd Font v2's legacy Material Design Iconic
 block (U+E63E–U+EB68), which Nerd Font v3 dropped. Don't trust those
 codepoints in a v3 environment.
@@ -115,12 +115,17 @@ are identified by appearance and role:
 | U+E0A9         | eye                | `label-private` node-state       |
 | U+E258..U+E25C | signal bars        | wifi `ramp-signal` (5 levels)    |
 | U+E234         | sun                | backlight ramp                   |
+| U+E04E         | speaker, silent    | `ramp-volume-0`                  |
+| U+E204         | speaker            | `ramp-volume-1`                  |
+| U+E050         | speaker, one wave  | `ramp-volume-2`                  |
+| U+E203         | speaker, waves     | `ramp-volume-3`, `-4` (loud)     |
+| U+E04F         | speaker, muted (×) | `label-muted`                    |
 
 Everything else falls to Nerd Font v3 via `font-1`:
 
 1. FontAwesome (`nf-fa-*`, U+F000–U+F2FF) — battery ramp (U+F240..U+F244),
-   bolt (U+F0E7), volume (U+F026..U+F028), and the two bspwm node-state
-   glyphs siji lacks: fullscreen (U+F065) and locked (U+F023).
+   bolt (U+F0E7), and the two bspwm node-state glyphs siji lacks:
+   fullscreen (U+F065) and locked (U+F023).
 2. Material Design (`nf-md-*`, U+F0001+) — reserved fallback for when FA
    lacks a semantic; not currently used by any module.
 
