@@ -1,0 +1,158 @@
+#!/bin/sh
+
+# screenshot — capture the screen with maim and route it to a destination.
+#
+# Usage:
+#   screenshot <focused|root|region> <show|hide> <tmp|dir|clip>
+#
+# Capture area (mode):
+#   focused  the monitor showing the focused window — the active window's
+#            monitor (EWMH `_NET_ACTIVE_WINDOW`), else the monitor under the
+#            mouse pointer. WM-agnostic: uses xdotool + xrandr, never a WM.
+#   root     every connected output (the whole X root window)
+#   region   a drag-selected rectangle (slop, via `maim -s`)
+#
+# Cursor:
+#   show     leave the mouse pointer in the image (maim default)
+#   hide     omit it (`maim --hidecursor`)
+#
+# Destination (output):
+#   tmp   a throwaway PNG under ${TMPDIR:-/tmp}/screenshots
+#   dir   a kept PNG under "$(xdg-user-dir PICTURES)/screenshots"
+#   clip  the image bytes on the clipboard (no file kept)
+#
+# For tmp/dir the saved path is copied to the clipboard and a notification
+# with a thumbnail is shown. For clip a plain "copied" notification is shown.
+# Cancelling a region selection (Esc) exits quietly with no notification.
+
+set -eu
+
+readonly APP='screenshot'
+
+# Print usage to stderr and exit non-zero.
+usage() {
+  printf 'usage: %s <focused|root|region> <show|hide> <tmp|dir|clip>\n' \
+    "${0##*/}" >&2
+  exit 2
+}
+
+# Print an error to stderr.
+err() { printf '%s: %s\n' "$APP" "$*" >&2; }
+
+# Notify (low urgency) with thumbnail $1 (empty for none), summary $2, body $3.
+notify() {
+  if [ "$1" != "" ]; then
+    notify-send --urgency=low -i "$1" "$2" "$3"
+  else
+    notify-send --urgency=low "$2" "$3"
+  fi
+}
+
+# Echo "X Y" of the focus point: the active window's centre, or the mouse
+# pointer when there is no active window. WM-agnostic (EWMH + X core).
+focus_point() {
+  if win=$(xdotool getactivewindow 2>/dev/null) && [ "$win" != "" ]; then
+    xdotool getwindowgeometry --shell "$win" | awk -F= '
+      /^X=/ { x = $2 }
+      /^Y=/ { y = $2 }
+      /^WIDTH=/ { w = $2 }
+      /^HEIGHT=/ { h = $2 }
+      END { print x + int(w / 2), y + int(h / 2) }
+    '
+  else
+    xdotool getmouselocation --shell | awk -F= '
+      /^X=/ { x = $2 }
+      /^Y=/ { y = $2 }
+      END { print x, y }
+    '
+  fi
+}
+
+# Echo the WxH+X+Y of the monitor containing the focus point, or fail non-zero.
+focused_geometry() {
+  point=$(focus_point)
+  px=${point% *}
+  py=${point#* }
+  xrandr --listmonitors | awk -v px="$px" -v py="$py" '
+    NR == 1 { next }
+    {
+      geo = $3
+      gsub(/\/[0-9]+/, "", geo)
+      if (split(geo, a, /[x+]/) == 4 &&
+        px >= a[3] + 0 && px < a[3] + a[1] &&
+        py >= a[4] + 0 && py < a[4] + a[2]) {
+        print geo
+        found = 1
+        exit
+      }
+    }
+    END { exit(found ? 0 : 1) }
+  '
+}
+
+# Echo a fresh "YYMMDD-HHMMSS-rnd.png" path inside dir $1 (created if absent).
+new_file() {
+  mkdir -p "$1"
+  mktemp -p "$1" "$(date +%y%m%d-%H%M%S)-XXX.png"
+}
+
+# Capture (maim flags in "$@") into dir $1, copy the path, notify.
+to_file() {
+  dir=$1
+  shift
+  file=$(new_file "$dir")
+  if maim "$@" "$file" 2>/dev/null; then
+    printf '%s' "$file" | xclip -selection clipboard
+    notify "$file" 'Screenshot' "$file"
+  else
+    rm -f "$file"
+    err 'capture cancelled or failed'
+  fi
+}
+
+# Capture (maim flags in "$@") into a private temp, copy the bytes, notify.
+to_clip() {
+  file=$(mktemp -p "${TMPDIR:-/tmp}" "$APP-clip-XXXXXX.png")
+  if maim "$@" "$file" 2>/dev/null; then
+    xclip -selection clipboard -t image/png "$file"
+    notify '' 'Screenshot' 'Copied to clipboard'
+  else
+    err 'capture cancelled or failed'
+  fi
+  rm -f "$file"
+}
+
+# Validate args, build maim flags, dispatch to the destination.
+main() {
+  [ "$#" -eq 3 ] || usage
+  mode=$1
+  cursor=$2
+  output=$3
+  case "$mode" in focused | root | region) ;; *) usage ;; esac
+  case "$cursor" in show | hide) ;; *) usage ;; esac
+  case "$output" in tmp | dir | clip) ;; *) usage ;; esac
+
+  set --
+  if [ "$cursor" = hide ]; then set -- "$@" --hidecursor; fi
+  case "$mode" in
+    focused)
+      if ! geom=$(focused_geometry); then
+        notify '' 'Screenshot failed' \
+          'could not determine focused monitor geometry'
+        err 'could not determine focused monitor geometry'
+        exit 1
+      fi
+      set -- "$@" -g "$geom"
+      ;;
+    region) set -- "$@" -s ;;
+    root) ;;
+  esac
+
+  case "$output" in
+    clip) to_clip "$@" ;;
+    tmp) to_file "${TMPDIR:-/tmp}/screenshots" "$@" ;;
+    dir) to_file "$(xdg-user-dir PICTURES)/screenshots" "$@" ;;
+  esac
+}
+
+main "$@"

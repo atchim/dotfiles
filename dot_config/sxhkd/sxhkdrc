@@ -46,3 +46,11 @@ super + ctrl + l ; b
 # Restart dunst in place (no SIGUSR signal exists; kill + respawn).
 super + ctrl + l ; d
   pkill dunst; dunst &
+
+# Screenshot (cursor shown): pick capture area, then output.
+super + space ; {s, ctrl + s, shift + s} ; {t,s,c}
+  screenshot {focused,root,region} show {tmp,dir,clip}
+
+# Screenshot (cursor hidden via h): pick capture area, then output.
+super + space ; {s, ctrl + s, shift + s} ; h ; {t,s,c}
+  screenshot {focused,root,region} hide {tmp,dir,clip}
