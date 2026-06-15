@@ -107,6 +107,29 @@ Status_). They need:
   `media-sound/alsa-utils`. Provides `amixer` for the volume click-action
   and `alsamixer` (bound to `super + space ; m`).
 
+### Color scheme
+
+Apps with a system-level light/dark preference follow the freedesktop
+**color-scheme** setting, delivered over the desktop portal. The value lives
+in gsettings (`org.gnome.desktop.interface color-scheme`) and is set to
+`prefer-dark` by the `run_onchange_after_set-color-scheme.sh` chezmoiscript.
+
+- [xdg-desktop-portal](https://github.com/flatpak/xdg-desktop-portal) —
+  `sys-apps/xdg-desktop-portal`. The D-Bus service
+  (`org.freedesktop.portal.Desktop`) that serves the preference over the
+  `org.freedesktop.appearance color-scheme` namespace. D-Bus-activated on
+  demand — no autostart needed.
+- [xdg-desktop-portal-gtk](https://github.com/flatpak/xdg-desktop-portal-gtk)
+  — `sys-apps/xdg-desktop-portal-gtk`. The Settings backend that reads the
+  gsettings value and feeds it to the portal; its backend auto-selects even
+  with `XDG_CURRENT_DESKTOP` unset.
+- [glib](https://gitlab.gnome.org/GNOME/glib) — `dev-libs/glib`. Provides
+  `gsettings`, used by the chezmoiscript to apply the preference.
+
+Portal-aware apps follow it through their "auto"/system mode — e.g.
+qutebrowser's `colors.webpage.preferred_color_scheme` (left at its `auto`
+default). The value is read at launch, so restart apps after changing it.
+
 ## Installation
 
 ```sh
