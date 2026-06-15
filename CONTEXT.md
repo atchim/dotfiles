@@ -81,6 +81,12 @@ register (`0..87` on this codec) and from amixer's dB-linear `%`. Helper
 scripts (`audio-jack-monitor`) and the polybar volume ramp target it.
 _Avoid_: volume %, raw volume, amixer %
 
+**Capture mode**:
+How much of the desktop the `screenshot` helper grabs. **focused** is the
+focused monitor's rectangle; **root** is every connected output (the whole
+X root window); **region** is a drag-selected rectangle.
+_Avoid_: screen (X11 "screen" is the root — the inverse of "focused")
+
 ## Relationships
 
 - A **Topology** has one **Laptop output** and zero or one **External
@@ -94,6 +100,8 @@ _Avoid_: volume %, raw volume, amixer %
   layer (mounted by `sx`) or the WM layer (mounted by `bspwmrc`).
 - Reconcilers must keep **EWMH state** in agreement with bspwm's
   internal state when they move nodes across monitors.
+- A **root** capture spans the whole **Topology**; a **focused** capture
+  covers one monitor of it.
 
 ## Example dialogue
 
