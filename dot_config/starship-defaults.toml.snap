@@ -1,6 +1,6 @@
 # Warning: This config does not include keys that have an unset value
 
-# $all is shorthand for $username$hostname$localip$shlvl$singularity$kubernetes$nats$directory$vcsh$fossil_branch$fossil_metrics$git_branch$git_commit$git_state$git_metrics$git_status$hg_branch$hg_state$pijul_channel$docker_context$package$bun$c$cmake$cobol$cpp$daml$dart$deno$dotnet$elixir$elm$erlang$fennel$fortran$gleam$golang$gradle$haskell$haxe$helm$java$julia$kotlin$lua$mojo$nim$nodejs$ocaml$odin$opa$perl$php$pulumi$purescript$python$quarto$raku$rlang$red$ruby$rust$scala$solidity$swift$terraform$typst$vlang$vagrant$xmake$zig$buf$guix_shell$nix_shell$conda$pixi$meson$spack$memory_usage$aws$gcloud$openstack$azure$direnv$env_var$mise$crystal$custom$sudo$cmd_duration$line_break$jobs$battery$time$status$container$netns$os$shell$character
+# $all is shorthand for $username$hostname$localip$shlvl$singularity$kubernetes$nats$directory$vcsh$fossil_branch$fossil_metrics$git_branch$git_commit$git_state$git_metrics$git_status$hg_branch$hg_state$pijul_channel$docker_context$package$bun$c$cmake$cobol$cpp$daml$dart$deno$dotnet$elixir$elm$erlang$fennel$fortran$gleam$golang$gradle$haskell$haxe$helm$java$julia$kotlin$lua$maven$mojo$nim$nodejs$ocaml$odin$opa$perl$php$pulumi$purescript$python$quarto$raku$rlang$red$ruby$rust$scala$solidity$swift$terraform$typst$vlang$vagrant$xmake$zig$buf$guix_shell$nix_shell$conda$pixi$meson$spack$memory_usage$aws$gcloud$openstack$azure$direnv$env_var$mise$crystal$custom$sudo$cmd_duration$line_break$jobs$battery$time$status$container$netns$os$shell$character
 "$schema" = "https://starship.rs/config-schema.json"
 format = "$all"
 right_format = ""
@@ -38,7 +38,7 @@ disabled = true
 full_symbol = "󰁹 "
 charging_symbol = "󰂄 "
 discharging_symbol = "󰂃 "
-unknown_symbol = "󰁽 "
+unknown_symbol = "󰂑 "
 empty_symbol = "󰂎 "
 disabled = false
 format = "[$symbol$percentage]($style) "
@@ -111,6 +111,63 @@ vimcmd_visual_symbol = "[❮](bold yellow)"
 vimcmd_replace_symbol = "[❮](bold purple)"
 vimcmd_replace_one_symbol = "[❮](bold purple)"
 disabled = false
+
+[claude_context]
+format = "[$gauge $percentage]($style) "
+symbol = ""
+gauge_width = 5
+gauge_full_symbol = "█"
+gauge_partial_symbol = "▒"
+gauge_empty_symbol = "░"
+disabled = false
+
+[[claude_context.display]]
+threshold = 0.0
+style = "bold green"
+hidden = true
+
+[[claude_context.display]]
+threshold = 30.0
+style = "bold green"
+hidden = false
+
+[[claude_context.display]]
+threshold = 60.0
+style = "bold yellow"
+hidden = false
+
+[[claude_context.display]]
+threshold = 80.0
+style = "bold red"
+hidden = false
+
+[claude_cost]
+format = '[$symbol(\$$cost)]($style) '
+symbol = "💰 "
+disabled = false
+
+[[claude_cost.display]]
+threshold = 0.0
+style = "bold green"
+hidden = true
+
+[[claude_cost.display]]
+threshold = 1.0
+style = "bold yellow"
+hidden = false
+
+[[claude_cost.display]]
+threshold = 5.0
+style = "bold red"
+hidden = false
+
+[claude_model]
+format = "[$symbol$model]($style) "
+symbol = "🤖 "
+style = "bold blue"
+disabled = false
+
+[claude_model.model_aliases]
 
 [cmake]
 format = "via [$symbol($version )]($style)"
@@ -253,6 +310,7 @@ detect_folders = []
 [directory]
 truncation_length = 3
 truncate_to_repo = true
+substitutions = []
 fish_style_pwd_dir_length = 0
 use_logical_path = true
 format = "[$path]($style)[$read_only]($read_only_style) "
@@ -264,8 +322,6 @@ read_only_style = "red"
 truncation_symbol = ""
 home_symbol = "~"
 use_os_path_sep = true
-
-[directory.substitutions]
 
 [direnv]
 format = "[$symbol$loaded/$allowed]($style) "
@@ -499,6 +555,14 @@ modified = "!"
 staged = "+"
 untracked = "?"
 typechanged = ""
+worktree_added = ""
+worktree_deleted = ""
+worktree_modified = ""
+worktree_typechanged = ""
+index_added = ""
+index_deleted = ""
+index_modified = ""
+index_typechanged = ""
 ignore_submodules = false
 disabled = false
 use_git_executable = false
@@ -730,6 +794,17 @@ disabled = false
 detect_extensions = ["lua"]
 detect_files = [".lua-version"]
 detect_folders = ["lua"]
+
+[maven]
+format = "via [$symbol($version )]($style)"
+version_format = "v${raw}"
+symbol = "🅼 "
+style = "bold bright-cyan"
+disabled = false
+recursive = false
+detect_extensions = []
+detect_files = ["pom.xml"]
+detect_folders = [".mvn"]
 
 [memory_usage]
 threshold = 75
@@ -1069,6 +1144,7 @@ detect_files = [
 ]
 detect_folders = []
 detect_env_vars = ["VIRTUAL_ENV"]
+generic_venv_names = []
 
 [quarto]
 format = "via [$symbol($version )]($style)"
@@ -1312,6 +1388,19 @@ disabled = false
 detect_extensions = []
 detect_files = ["Vagrantfile"]
 detect_folders = []
+
+[vcs]
+order = [
+    "git",
+    "hg",
+    "pijul",
+    "fossil",
+]
+disabled = false
+fossil_modules = "$fossil_branch$fossil_metrics"
+git_modules = "$git_branch$git_commit$git_state$git_metrics$git_status"
+hg_modules = "$hg_branch$hg_state"
+pijul_modules = "$pijul_channel"
 
 [vcsh]
 symbol = ""
