@@ -6,7 +6,7 @@ _DEFAULT = ';;'.join(
     'set tabs.position top',
     'set tabs.width 15%',
     'set statusbar.show in-mode',
-    'set scrolling.bar when-searching',
+    'set scrolling.bar overlay',
   ]
 )
 _INFO = ';;'.join(
