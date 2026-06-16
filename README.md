@@ -29,6 +29,9 @@ Helper scripts at `~/.local/bin/`:
   microchip glyph for the polybar cpu module.
 - `polybar-notify` — backs every status module's `click-left`; pops a
   `notify-send` bubble with the precise reading.
+- `screenshot` — maim wrapper; captures the focused monitor (resolved
+  WM-agnostically via xdotool + xrandr), the whole root, or a region, and
+  routes it to a PNG or the clipboard. Bound in sxhkd; see _Screenshot_ below.
 
 ## Prerequisites
 
@@ -129,6 +132,31 @@ in gsettings (`org.gnome.desktop.interface color-scheme`) and is set to
 Portal-aware apps follow it through their "auto"/system mode — e.g.
 qutebrowser's `colors.webpage.preferred_color_scheme` (left at its `auto`
 default). The value is read at launch, so restart apps after changing it.
+
+### Screenshot
+
+The `screenshot` helper (`~/.local/bin/screenshot`) wraps
+[maim](https://github.com/naelstrof/maim), bound in sxhkd under
+`super + space ; {s, ctrl + s, shift + s} ; [h] ; {t, s, c}`: pick the capture
+area — focused monitor (`s`), root (`ctrl + s`), or a drag-selected region
+(`shift + s`) — an optional `h` to hide the cursor, then the destination — a
+throwaway PNG under `$TMPDIR` (`t`), a kept PNG under
+`$(xdg-user-dir PICTURES)/screenshots` (`s`), or the image bytes on the
+clipboard (`c`). The focused monitor is resolved without the WM: the active
+window (EWMH, via xdotool) or the pointer as fallback, matched against
+`xrandr` geometry. Required tools:
+
+- [maim](https://github.com/naelstrof/maim) — `media-gfx/maim`. The screen
+  grabber; region select (`maim -s`) pulls in `x11-misc/slop`.
+- [xdotool](https://github.com/jordansissel/xdotool) — `x11-misc/xdotool`.
+  Locates the active window and pointer to pick the focused monitor.
+- [xdg-user-dirs](https://www.freedesktop.org/wiki/Software/xdg-user-dirs/) —
+  `x11-misc/xdg-user-dirs`. Provides `xdg-user-dir`, which resolves the
+  `PICTURES` directory for kept captures.
+
+It reuses tools documented above: `xrandr` for monitor geometry (see _bspwm +
+sxhkd_), `xclip` for the clipboard (see _tmux_), and `notify-send` + dunst for
+the preview notification (see _Polybar_).
 
 ## Installation
 
