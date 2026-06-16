@@ -26,6 +26,11 @@ super + space ; t
 super + space ; space
   rofi -modi run -show run -theme dmenu
 
+# Open the rofi calculator; Enter copies the result to the clipboard.
+super + space ; equal
+  rofi -show calc -modi calc -no-show-match -no-sort \
+    -calc-command "echo -n '{result}' | xclip -selection clipboard"
+
 # Toggle polybar visibility; reclaim bspwm's bottom padding on hide because
 # polybar's hidden window keeps its strut. Successive presses cycle the body
 # via sxhkd's same-LHS alternation.

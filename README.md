@@ -51,6 +51,9 @@ Helper scripts at `~/.local/bin/`:
 - [fish](https://fishshell.com)
 - [Neovim](https://neovim.io)
 - [qutebrowser](https://qutebrowser.org)
+- [rofi-calc](https://github.com/svenstaro/rofi-calc) — `x11-misc/rofi-calc`,
+  with `sci-libs/libqalculate` (the `qalc` engine). Calculator launcher bound
+  to `super + space ; equal`; Enter copies the result to the clipboard.
 - [Starship](https://starship.rs)
 - [tmux](https://github.com/tmux/tmux) with
   [xclip](https://github.com/astrand/xclip)
