@@ -97,4 +97,18 @@ main() {
   esac
 }
 
+# A session needs one shared D-Bus session bus: gnome-keyring's Secret
+# Service activates on it, so dunst, acli, and friends reach a single
+# keyring instead of each improvising a throwaway bus (which orphans
+# daemons and deadlocks). A bare-WM box has none, so re-exec the whole
+# session under a fresh bus before mounting anything; dbus-run-session
+# reaps the bus and any service it activated when the session ends. Help
+# mounts nothing, so it skips the bus.
+case "${1-}" in
+  -h | --help) ;;
+  *)
+    [ "${DBUS_SESSION_BUS_ADDRESS:-}" != "" ] || exec dbus-run-session -- "$0" "$@"
+    ;;
+esac
+
 main "$@"
