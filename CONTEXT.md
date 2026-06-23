@@ -43,6 +43,21 @@ The first non-`eDP` connected output. By convention it is xrandr-primary
 when present, but is _not_ the tray host (see ADR-0001).
 _Avoid_: secondary, monitor 2
 
+**Slot**:
+One of the ten desktop positions (1–10) each monitor owns. The Nth slot
+on one monitor corresponds to the Nth slot on another; `bspwm-monitor`
+merges windows by slot when an output detaches.
+_Avoid_: workspace, tag, desktop number
+
+**Parallel desktop**:
+For a given desktop, the desktop at the same Slot on the other monitor —
+e.g. the laptop's slot-3 desktop and the external's slot-3 desktop are
+parallels. Sending a window to its parallel desktop relocates it across
+monitors while preserving its slot, distinct from a plain cross-monitor
+move (which lands on the target monitor's focused desktop).
+_Avoid_: mirror (implies duplication), sibling (collides with bspwm
+sibling nodes), twin
+
 **Layer**:
 The owner of an autostart. Two values: **session layer** (owned by
 `sx`) and **WM layer** (owned by `bspwmrc`). The boundary is identity,
@@ -100,6 +115,8 @@ _Avoid_: screen (X11 "screen" is the root — the inverse of "focused")
   layer (mounted by `sx`) or the WM layer (mounted by `bspwmrc`).
 - Reconcilers must keep **EWMH state** in agreement with bspwm's
   internal state when they move nodes across monitors.
+- A window can be sent to its **Parallel desktop** to cross monitors
+  without changing its **Slot**.
 - A **root** capture spans the whole **Topology**; a **focused** capture
   covers one monitor of it.
 

@@ -80,8 +80,13 @@ super + w ; shift + {h,j,k,l}
   bspc node --to-monitor {west,south,north,east} --follow
 
 # Swap the current desktop with the focused desktop on the neighbour monitor.
-super + w ; g ; {h,j,k,l}
+super + w ; x ; {h,j,k,l}
   bspc desktop --swap {west,south,north,east}:focused
+
+# Send the focused window to its parallel desktop — the same slot on the
+# other monitor; the shift variant follows the window across.
+super + w ; {_,shift + }g
+  bspwm-send-parallel {stay,follow}
 
 # Place the external monitor in a cardinal direction relative to the laptop.
 super + w ; p ; {h,j,k,l}
