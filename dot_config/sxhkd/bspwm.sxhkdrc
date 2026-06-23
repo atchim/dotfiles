@@ -79,13 +79,22 @@ super + w ; {h,j,k,l}
 super + w ; shift + {h,j,k,l}
   bspc node --to-monitor {west,south,north,east} --follow
 
+# Focus slot N across monitors, preferring the focused one — jump to the
+# other monitor only when it alone has content for that slot.
+super + w ; g ; {1-9,0}
+  bspwm-focus-slot {1-9,10}
+
 # Swap the current desktop with the focused desktop on the neighbour monitor.
 super + w ; x ; {h,j,k,l}
   bspc desktop --swap {west,south,north,east}:focused
 
+# Swap as above, but follow the desktop across to the neighbour monitor.
+super + w ; x ; shift + {h,j,k,l}
+  bspc desktop --swap {west,south,north,east}:focused --follow
+
 # Send the focused window to its parallel desktop — the same slot on the
 # other monitor; the shift variant follows the window across.
-super + w ; {_,shift + }g
+super + w ; x ; {_,shift + }x
   bspwm-send-parallel {stay,follow}
 
 # Place the external monitor in a cardinal direction relative to the laptop.

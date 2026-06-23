@@ -117,6 +117,9 @@ _Avoid_: screen (X11 "screen" is the root — the inverse of "focused")
   internal state when they move nodes across monitors.
 - A window can be sent to its **Parallel desktop** to cross monitors
   without changing its **Slot**.
+- A **Slot** can be focused across monitors: the focused monitor's
+  instance wins, falling back to the other monitor's only when it alone
+  holds a window.
 - A **root** capture spans the whole **Topology**; a **focused** capture
   covers one monitor of it.
 

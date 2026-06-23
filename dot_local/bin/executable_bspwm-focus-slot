@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# bspwm-focus-slot — focus slot N, seeking its content across monitors.
+# Prefer the focused monitor: if its slot-N desktop holds a window, focus
+# there; else if the other monitor's slot-N desktop holds one, cross to it;
+# else focus the focused monitor's (empty) slot N. With a single monitor
+# this degrades to a local slot focus, like `super + N`. (See CONTEXT.md:
+# Slot, Parallel desktop.)
+
+set -eu
+
+# Print usage to stderr and exit non-zero.
+usage() {
+  printf 'usage: %s <slot 1-10>\n' "${0##*/}" >&2
+  exit 2
+}
+
+# True if the desktop selector $1 holds at least one window.
+desktop_occupied() {
+  [ "$(bspc query -D -d "${1}.occupied" --names 2>/dev/null)" != "" ]
+}
+
+main() {
+  [ "$#" -eq 1 ] || usage
+  case "$1" in
+    [1-9] | 10) ;;
+    *) usage ;;
+  esac
+  slot="$1"
+
+  foc="focused:^${slot}"
+
+  # The focused monitor wins when its slot holds content.
+  if desktop_occupied "$foc"; then
+    bspc desktop "$foc" --focus
+    return 0
+  fi
+
+  # Otherwise cross to the other monitor's slot when it holds content.
+  focused_mon=$(bspc query -M -m focused --names)
+  other_mon=$(bspc query -M --names | grep -vx -- "$focused_mon" | head -n1)
+  if [ "$other_mon" != "" ]; then
+    other="${other_mon}:^${slot}"
+    if desktop_occupied "$other"; then
+      bspc desktop "$other" --focus
+      return 0
+    fi
+  fi
+
+  # Neither holds content: land on the focused monitor's (empty) slot.
+  bspc desktop "$foc" --focus
+}
+
+main "$@"
