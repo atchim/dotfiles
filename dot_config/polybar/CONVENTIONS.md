@@ -102,8 +102,8 @@ are identified by appearance and role:
 
 | Codepoint(s)   | Glyph              | Used for                           |
 | -------------- | ------------------ | ---------------------------------- |
-| U+E1A1         | terminal/console   | `tty` / `tty.x` workspace icon     |
-| U+E1A0         | compass            | `browse` / `browse.x` icon         |
+| U+E1A1         | terminal/console   | `tty` / `tty-x` workspace icon     |
+| U+E1A0         | compass            | `browse` / `browse-x` icon         |
 | U+E176..U+E17C | bitmap digits 3..9 | `d3..d9` workspace labels          |
 | U+E173         | bitmap digit 0     | `d0` workspace label (10th slot)   |
 | U+E136         | tiled windows      | `label-tiled` layout               |
@@ -213,16 +213,16 @@ so polybar logs no errors. See `docs/adr/0002-runtime-hardware-detection.md`.
 ## Workspace Icons
 
 The bspwm desktop set is `tty browse d3 d4 d5 d6 d7 d8 d9 d0` on the
-laptop and `tty.x browse.x d3.x … d0.x` on the external. Workspace
+laptop and `tty-x browse-x d3-x … d0-x` on the external. Workspace
 icons map by **literal desktop name**, all rendered from siji bitmaps:
 
-- `tty` / `tty.x` → terminal glyph
-- `browse` / `browse.x` → compass glyph
-- `d3..d9` / `d3.x..d9.x` → siji digit `3`..`9`
-- `d0` / `d0.x` → siji digit `0` (the 10th slot)
+- `tty` / `tty-x` → terminal glyph
+- `browse` / `browse-x` → compass glyph
+- `d3..d9` / `d3-x..d9-x` → siji digit `3`..`9`
+- `d0` / `d0-x` → siji digit `0` (the 10th slot)
 
 `pin-workspaces = true` scopes each bar instance to its monitor's
-desktops, so the laptop bar never shows `.x` slots and vice versa.
+desktops, so the laptop bar never shows `-x` slots and vice versa.
 
 ## Tray
 

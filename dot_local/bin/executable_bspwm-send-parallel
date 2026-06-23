@@ -2,14 +2,9 @@
 
 # bspwm-send-parallel — send the focused window to its parallel desktop:
 # the same slot on the other monitor, keeping the desktop's slot. With at
-# most two monitors, "the other monitor" is simply the non-focused one, so
-# no laptop/external identity is needed.
-#
-# The target is addressed by slot index (`<monitor>:^N`), NOT by desktop
-# name: external desktops carry a `.x` suffix (see bspwm-monitor) and
-# bspwm's selector grammar treats `.` as the modifier delimiter, so a name
-# like `browse.x` is unselectable via `-d`. The `^N` slot selector
-# sidesteps that entirely.
+# most two monitors, the parallel desktop is just the focused desktop's
+# name with the external `-x` suffix toggled (see bspwm-monitor): a laptop
+# desktop `browse` pairs with the external `browse-x`, and vice versa.
 
 set -eu
 
@@ -29,20 +24,20 @@ main() {
   # A window must be focused to move it.
   bspc query -N -n focused >/dev/null 2>&1 || exit 0
 
-  # Slot index (1-based) of the focused desktop within its monitor.
+  # Toggle the `-x` suffix to reach the same slot on the other monitor.
   cur=$(bspc query -D -d focused --names)
-  slot=$(bspc query -D -m focused --names | grep -nxF "$cur" | cut -d: -f1)
-  [ "$slot" != "" ] || exit 0
+  case "$cur" in
+    *-x) dest="${cur%-x}" ;;
+    *) dest="${cur}-x" ;;
+  esac
 
-  # The other monitor: the non-focused one (no-op on a single monitor).
-  focused_mon=$(bspc query -M -m focused --names)
-  other=$(bspc query -M --names | grep -vxF "$focused_mon" | head -n1)
-  [ "$other" != "" ] || exit 0
+  # No-op when the parallel desktop doesn't exist (e.g. single monitor).
+  bspc query -D -d "$dest" >/dev/null 2>&1 || exit 0
 
   if [ "$1" = follow ]; then
-    bspc node -d "${other}:^${slot}" --follow
+    bspc node -d "$dest" --follow
   else
-    bspc node -d "${other}:^${slot}"
+    bspc node -d "$dest"
   fi
 }
 
