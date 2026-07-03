@@ -102,6 +102,13 @@ focused monitor's rectangle; **root** is every connected output (the whole
 X root window); **region** is a drag-selected rectangle.
 _Avoid_: screen (X11 "screen" is the root — the inverse of "focused")
 
+**Tap-zone click**:
+A synthesized pointer button — left, right, or middle — chosen by where a
+single-finger touchpad tap lands, not by how many fingers tap. Emitted by
+`tapzoned`, mirroring libinput's `button_areas` zones but on a tap instead
+of a physical button press.
+_Avoid_: tap-to-click (libinput's count-based feature), soft click
+
 ## Relationships
 
 - A **Topology** has one **Laptop output** and zero or one **External
