@@ -161,6 +161,21 @@ It reuses tools documented above: `xrandr` for monitor geometry (see _bspwm +
 sxhkd_), `xclip` for the clipboard (see _tmux_), and `notify-send` + dunst for
 the preview notification (see _Polybar_).
 
+### Tap-zone clicks
+
+A single-finger touchpad tap acts as a left, right, or middle click chosen
+by where it lands (see the **Tap-zone click** entry in `CONTEXT.md`). It
+comes from [tapzoned](https://github.com/atchim/tapzoned), a small evdev
+daemon autostarted by `sx` with `--backend xtest`: it reads the pad
+read-only and injects the click over XTEST, so libinput keeps owning
+pointer motion and two-finger scroll. Native libinput tapping stays off
+(its default), so the two never double-fire. See
+`docs/adr/0005-tap-zone-clicks-from-a-custom-daemon.md`.
+
+- [tapzoned](https://github.com/atchim/tapzoned) — built from source; an
+  `x11-misc/tapzoned` eslop ebuild is planned. Reading the touchpad needs
+  membership in the `input` group (`sudo gpasswd -a "$USER" input`).
+
 ## Installation
 
 ```sh
