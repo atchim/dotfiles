@@ -15,8 +15,6 @@ push_dir() {
 test_cmd ccache && push_dir /usr/lib/ccache/bin
 push_dir "$HOME/.local/bin"
 push_dir "$HOME/.opencode/bin"
-push_dir "$HOME/.yarn/bin"
-push_dir "$HOME/node_modules/.bin"
 
 # cargo
 # -----
@@ -29,6 +27,12 @@ push_dir "$HOME/node_modules/.bin"
 
 export PNPM_HOME="$HOME/.local/share/pnpm"
 push_dir "$PNPM_HOME/bin"
+
+# npm
+# ---
+
+export NPM_CONFIG_PREFIX="$HOME/.local/npm"
+push_dir "$NPM_CONFIG_PREFIX/bin"
 
 # bun
 # ---
