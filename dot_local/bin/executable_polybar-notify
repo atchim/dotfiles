@@ -9,7 +9,7 @@
 # Subcommands:
 #   backlight   computes percent from $BACKLIGHT brightness vs max_brightness
 #   cpu         reads the percent stashed by polybar-cpu
-#   volume      parses `amixer get Master`
+#   volume      reads the default-sink volume via wpctl
 
 set -eu
 
@@ -36,7 +36,8 @@ main() {
       notify-send 'CPU usage' "${pct}%"
       ;;
     volume)
-      v=$(amixer get Master 2>/dev/null | awk -F'[][]' '/%/{ print $2; exit }')
+      v=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null \
+        | awk '{ printf "%d%%", $2 * 100; if ($3 == "[MUTED]") printf " (muted)" }')
       notify-send 'Volume' "${v:-?}"
       ;;
     '')

@@ -79,9 +79,9 @@ Border + presel-feedback colors are sourced live from the
 ### Polybar
 
 - [polybar](https://polybar.github.io) — `x11-misc/polybar` built with
-  USE flags `+ipc +alsa +network` (polybar-msg, internal/alsa for the
-  volume module, internal/network for the wifi module). `+pulseaudio`
-  is intentionally off — this system is ALSA-focused.
+  USE flags `+ipc +pulseaudio +network` (polybar-msg, internal/pulseaudio
+  for the volume module, internal/network for the wifi module). `+alsa` is
+  off — the volume module follows the PipeWire default sink (see _Audio_).
 - [Hack Nerd Font Mono](https://www.nerdfonts.com) — secondary font in
   the bar's stack. siji (`Wuncon Siji` upstream) is primary; auto-pulled
   by `.chezmoiexternal.toml` to `~/.local/share/fonts/siji.pcf`, with
@@ -109,9 +109,29 @@ Status_). They need:
 - [wireless-tools](https://hewlettpackard.github.io/wireless-tools/) —
   `net-wireless/wireless-tools`. Provides `iwgetid` for the wifi
   click-action.
-- [alsa-utils](https://alsa-project.org/wiki/Main_Page) —
-  `media-sound/alsa-utils`. Provides `amixer` for the volume click-action
-  and `alsamixer` (bound to `super + space ; m`).
+
+### Audio
+
+Audio runs on a **PipeWire sound server** (see
+`docs/adr/0006-audio-runs-on-pipewire-not-raw-alsa.md` and the _Sound server_
+entry in `CONTEXT.md`), not raw ALSA. `sx` autostarts it via
+`gentoo-pipewire-launcher`.
+
+- [PipeWire](https://pipewire.org) — `media-video/pipewire` with
+  `+pulseaudio +sound-server +pipewire-alsa`. The graph, the `pipewire-pulse`
+  PulseAudio-compat socket, and the ALSA→PipeWire bridge, so every backend
+  funnels through one mixer.
+- [WirePlumber](https://pipewire.pages.freedesktop.org/wireplumber/) —
+  `media-video/wireplumber`. Session/policy manager; provides `wpctl` (volume
+  mute + click-notify), remembers per-port volume, and auto-switches on jack
+  plug.
+- [ncpamixer](https://github.com/fulhax/ncpamixer) — `media-sound/ncpamixer`.
+  TUI mixer, opened in a floating terminal by `super + space ; m`.
+
+The official Spotify client is PulseAudio-only and its packaged wrapper
+preloads apulse (which breaks track changes), so `~/.local/bin/spotify`
+launches it without that preload, reaching `pipewire-pulse`. apulse stays
+installed — firefox links `apulse[sdk]`.
 
 ### Color scheme
 

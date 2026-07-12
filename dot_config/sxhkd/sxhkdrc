@@ -12,10 +12,10 @@ super + space ; k ; u
 super + Return
   alacritty msg create-window || alacritty
 
-# Open alsamixer in a floating terminal.
+# Open the audio mixer in a floating terminal.
 super + space ; m
-  alacritty msg create-window --class floating -e alsamixer -g \
-    || alacritty --class floating -e alsamixer -g
+  alacritty msg create-window --class floating -e ncpamixer \
+    || alacritty --class floating -e ncpamixer
 
 # Open htop in a floating terminal.
 super + space ; t

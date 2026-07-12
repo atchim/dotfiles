@@ -62,7 +62,8 @@ bspwm() {
   # Tap-zone clicks from a single-finger tap; SEE: `docs/adr/0005-*.md`.
   tapzoned --backend xtest &
   srandrd -n topology-event &
-  audio-jack-monitor watch &
+  # Sound server: PipeWire + pipewire-pulse + WirePlumber (self-guards vs double-start).
+  gentoo-pipewire-launcher &
   polybar-launch -t eDP bspwm &
   unset _sxhkd_dir
   exec bspwm

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# spotify — launch the official client WITHOUT apulse's libpulse preload.
+#
+# The packaged /usr/bin/spotify hardcodes
+# `LD_LIBRARY_PATH=/usr/lib64/apulse:...`, shimming Spotify's PulseAudio
+# calls onto raw ALSA. apulse (0.1.14, unmaintained) can't survive the
+# stream teardown/recreate Spotify does on every next/prev, so playback
+# dies with "cannot start driver". apulse can't be uninstalled either —
+# firefox links `apulse[sdk]` at build time whenever `+pulseaudio`.
+#
+# So bypass the wrapper: with apulse not preloaded, Spotify resolves the
+# real /usr/lib64/libpulse.so.0 (media-libs/libpulse) and talks to
+# pipewire-pulse. `~/.local/bin` precedes `/usr/bin` in PATH, so this
+# shadows the packaged wrapper for terminal, menu (Exec=spotify), and the
+# `spotify:` URI handler alike. The official client is single-instance,
+# so a re-launch with a URI forwards to the running window on its own.
+
+exec env -u LD_LIBRARY_PATH /opt/spotify/spotify-client/spotify --no-zygote "$@"

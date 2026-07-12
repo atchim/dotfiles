@@ -9,12 +9,15 @@ repo-root `CONTEXT.md`. Hard-to-reverse decisions live in `docs/adr/`.
 The config depends on these `x11-misc/polybar` USE flags:
 
 - `+ipc` — `polybar-msg` (toggle, restart bindings) and `enable-ipc = true`.
-- `+alsa` — `internal/alsa` for the volume module on this ALSA-focused system.
+- `+pulseaudio` — `internal/pulseaudio` volume module; follows the PipeWire
+  default sink (the box runs a sound server — see the root `README.md` and
+  `docs/adr/0006-*.md`).
 - `+network` — `internal/network` for the wifi module.
 
-Not needed: `+pulseaudio` (we use ALSA), `+curl`, `+i3wm`, `+mpd`. Runtime
-dependencies (libnotify, wireless-tools, alsa-utils, dunst) are listed in
-the root `README.md`.
+Not needed: `+alsa` (superseded by `+pulseaudio` when the volume model moved
+to PipeWire), `+curl`, `+i3wm`, `+mpd`. Runtime dependencies (libnotify,
+wireless-tools, `wpctl` from wireplumber, dunst) are listed in the root
+`README.md`.
 
 ## Layout
 
@@ -186,8 +189,9 @@ one-liner helpers and keeps shell-escape cascades out of polybar's ini
 parser.
 
 Most modules bind it to `click-left`. Volume is on **`click-right`**,
-because `internal/alsa` reserves left-click for its built-in mute
-toggle. Battery and wifi have **no** click-action — their module-level
+because `click-left` toggles mute via `wpctl` on the default sink
+(`internal/pulseaudio` doesn't hardcode a mute click). Battery and wifi
+have **no** click-action — their module-level
 `click-left` never fired (and battery's `capacity` read showed `?%`
 besides) — so both stay glyph-only.
 

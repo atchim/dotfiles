@@ -89,12 +89,24 @@ reconcile so EWMH consumers (rofi -modi window, wmctrl) see correct
 desktop names instead of `n/a`.
 _Avoid_: window state (collides with bspwm's per-node tiling state)
 
-**Alsamixer scale**:
-The perceptual (logarithmic-in-dB) volume percentage alsamixer displays —
-the canonical "volume" number in this repo. Distinct from the raw mixer
-register (`0..87` on this codec) and from amixer's dB-linear `%`. Helper
-scripts (`audio-jack-monitor`) and the polybar volume ramp target it.
-_Avoid_: volume %, raw volume, amixer %
+**Volume**:
+The PipeWire default-sink volume as a percentage (100% = 0 dB), shown by
+`wpctl`, `ncpamixer`, and the polybar volume module (`internal/pulseaudio`).
+The canonical "volume" number in this repo. WirePlumber persists it per
+output port (headphones vs speakers) and restores it on jack plug.
+_Avoid_: Master, ALSA volume, raw register (the retired hardware-mixer
+model — see `docs/adr/0006-*.md`)
+
+**Sound server**:
+The PipeWire stack that owns the audio hardware and software-mixes every
+client: `pipewire` (the graph) + its `pipewire-pulse` PulseAudio-compat
+socket + `wireplumber` (session/policy). Autostarted by `sx` via
+`gentoo-pipewire-launcher`. Distinct from **apulse** — a build-time
+PulseAudio→ALSA shim kept only because firefox links `apulse[sdk]`, not a
+server — and from PulseAudio proper, which is not installed. See
+`docs/adr/0006-*.md`.
+_Avoid_: PulseAudio (uninstalled; pipewire-pulse only speaks its protocol),
+audio server
 
 **Capture mode**:
 How much of the desktop the `screenshot` helper grabs. **focused** is the
