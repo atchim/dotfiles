@@ -3,5 +3,6 @@ CONTEXT.md
 README.md
 TODO.md
 docs
+skills-lock.json
 **/CONVENTIONS.md
 **/*.toml.snap

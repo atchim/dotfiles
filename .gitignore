@@ -1,0 +1,4 @@
+# Machine-local Claude Code state: permission grants carry absolute paths
+# from this box, so they are meaningless in a clone. The shared agent
+# config lives in AGENTS.md and docs/agents/ instead.
+.claude/settings.local.json

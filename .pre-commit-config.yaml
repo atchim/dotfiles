@@ -7,7 +7,10 @@ default_install_hook_types:
 # opts back into commit-msg explicitly.
 default_stages:
   - pre-commit
-exclude: \.toml\.snap$
+# .agents/ is vendored upstream (mattpocock/skills): not ours to reformat,
+# and skills-lock.json pins every file by content hash, so a prettier or
+# markdownlint --fix pass would invalidate it on the next skill update.
+exclude: (\.toml\.snap$|^\.agents/)
 repos:
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.4.0
