@@ -197,6 +197,65 @@ besides) — so both stay glyph-only.
 
 The bar stays wordless; the precise number is one click away.
 
+### Mouse actions
+
+The documented way to bind a mouse action is the module-level `click-left`
+/ `scroll-up` / `scroll-down` keys. **On internal modules they are
+unreliable**, and they fail silently — polybar parses them, logs nothing,
+and the module simply does not respond. This is what was behind battery
+and wifi "never firing" a click.
+
+Measured on polybar 3.7.2, driving synthetic button events at a bar on a
+headless X server:
+
+| Module                        | Buttons bound | Fires       |
+| ----------------------------- | ------------- | ----------- |
+| `custom/text`                 | left, scroll  | all         |
+| `internal/pulseaudio`         | all five      | mid + right |
+| `internal/backlight`          | all five      | none        |
+| `internal/date`               | left, scroll  | none        |
+| `internal/backlight` via tags | left, scroll  | all         |
+
+Two lessons. Buttons an internal module handles itself are eaten before
+the config keys see them — `internal/pulseaudio` swallows left-click for
+its own mute toggle and the scroll wheel for its own volume control, which
+is why `volume`'s `click-left = wpctl set-mute` line is dead code that
+happens to describe what polybar does anyway. But consumption is not the
+whole story: `internal/backlight` answers on **no** button, so something
+beyond built-in handlers is at work. Not worth chasing — the workaround is
+total.
+
+**So: on an `internal/*` module, bind mouse actions as `%{A}` tags inside
+`format`, not as module-level keys.** On `custom/*` modules the plain keys
+are fine and read better — `cpu` uses `click-left` and works.
+
+```ini
+; A1 = left, A2 = middle, A3 = right, A4 = scroll up, A5 = scroll down.
+format = %{A4:polybar-backlight up:}%{A5:polybar-backlight down:}<ramp>%{A}%{A}
+```
+
+Every `%{A...:cmd:}` needs a matching `%{A}` to close it, and **the command
+may not contain a colon** — the tag terminates on the first one.
+
+Only `backlight` needs this today. Its internal scroll writes a percentage
+of `max_brightness`, and on this panel under kernel 7.1 the top of that
+advertised range wraps the PWM register and blanks the display — so the
+write moved out to `polybar-backlight` (in `dot_local/bin/`), which clamps
+to the **Brightness ceiling** (repo-root `CONTEXT.md`). The module stays
+`internal/backlight` for the read and the ramp; only the write left. The
+constant and its derivation live in the script's header, the surrounding
+prerequisites in `modules/backlight.ini`, the decision in
+`docs/adr/0007-*.md`.
+
+That ceiling — not `max_brightness` — is what 100% means here, so
+`polybar-notify backlight` gets it from `polybar-backlight ceiling` rather
+than keeping a second copy. A helper that owns a number publishes it; it
+does not get duplicated into the helper that needs to read it.
+
+`polybar-backlight` is also the one helper that _writes_ hardware state
+rather than reporting it, which is why it did not merge into
+`polybar-notify` — that one stays read-only.
+
 ## Hardware-Conditional Modules
 
 Modules that depend on hardware (`battery`, `backlight`, `wifi`) read

@@ -1,0 +1,124 @@
+#!/bin/sh
+
+# polybar-backlight — step the panel backlight, clamped below the amdgpu cliff.
+#
+# Bound to scroll-up / scroll-down on the internal/backlight module, which runs
+# with enable-scroll = false so this is the only writer. The module keeps its
+# read and its ramp; only the write moves here.
+#
+# Why a wrapper at all: polybar's internal scroll writes a percentage of
+# max_brightness, and on kernel 7.1 amdgpu advertises a max_brightness whose
+# top values wrap the panel's 16-bit PWM register and black the display out.
+# polybar 3.7.2's internal/backlight has no ceiling option, so the write has to
+# leave the module. See CEILING.
+#
+# Reads $BACKLIGHT (the device name probed and exported by polybar-launch,
+# per docs/adr/0002-runtime-hardware-detection.md), same as polybar-notify.
+#
+# This script owns the answer to "what is full brightness on this panel", which
+# is *not* max_brightness — see CEILING. `ceiling` exists so polybar-notify can
+# ask rather than keep a second copy of that number: the Brightness ceiling is
+# the repo's 100% (repo-root CONTEXT.md), so both the write and the readout
+# have to divide by the same thing.
+#
+# Usage: polybar-backlight up|down|ceiling
+
+set -eu
+
+# Highest value writable to `brightness` without wrapping the PWM register.
+# Panel- and kernel-specific; measured on this panel under 7.1.8-lqx3:
+#
+#   written  PWM      duty
+#   64532    0xffff   100%
+#   64533    0x00e8   0.35%   <- wraps
+#   65535    0x048e   1.8%
+#
+# Cause: 7.1's amdgpu sets props.max_brightness = max where it used to set
+# max - min, commented "min is zero, so max needs to be adjusted". On this
+# panel min is not zero (min_input_signal = 12, so min = 0x101 * 12 = 3084), so
+# the advertised range now runs past what convert_brightness_from_user() maps
+# back into 16 bits and the tail wraps. 7.0.14 advertised 65535 - 3084 = 62451
+# and exposed no tail — so max_brightness itself changed 62451 -> 65535 across
+# the kernel bump, and any stored absolute value from before it is off.
+#
+# The number is empirical, not derived from the formula: re-measure if the
+# panel or the kernel changes. Drop the clamp once the range is fixed upstream,
+# or if the machine ever boots with amdgpu.dcdebugmask=0x40000
+# (DC_DISABLE_CUSTOM_BRIGHTNESS_CURVE), which linearises the whole range at the
+# cost of the panel's calibrated curve.
+readonly CEILING=64532
+
+# Percent of the effective ceiling per scroll tick, matching polybar's own step.
+readonly STEP_PCT=5
+
+# Echo the highest value this device will actually take: CEILING while the
+# kernel advertises a max above it, the advertised max otherwise.
+#
+# CEILING is only a ceiling while it is below what the device accepts. A kernel
+# that fixes the advertised range puts max_brightness back under it (7.0.14
+# advertised 62451), as would a different panel — and the kernel rejects any
+# write above max_brightness with -EINVAL, which under `set -e` would kill this
+# script mid-scroll with nothing to show for it. Taking the lower of the two
+# lets the clamp degrade into a plain max as the bug ages out.
+effective_ceiling() {
+  max=$(cat -- "$1/max_brightness")
+  if [ "$max" -lt "$CEILING" ]; then
+    printf '%d\n' "$max"
+  else
+    printf '%d\n' "$CEILING"
+  fi
+}
+
+main() {
+  dir="/sys/class/backlight/${BACKLIGHT-}"
+
+  if [ ! -r "$dir/max_brightness" ]; then
+    printf '%s: no backlight at %s — is BACKLIGHT set?\n' "${0##*/}" "$dir" >&2
+    exit 1
+  fi
+
+  case "${1-}" in
+    ceiling)
+      effective_ceiling "$dir"
+      return 0
+      ;;
+    up | down) ;;
+    *)
+      printf 'usage: %s up|down|ceiling\n' "${0##*/}" >&2
+      exit 2
+      ;;
+  esac
+
+  # Only the write path needs the udev rule, and only it warns. Both channels
+  # matter: stderr for a hand-run, notify-send because polybar-launch sends
+  # polybar's own stderr to /dev/null, so the stderr line alone would be
+  # invisible in the case it exists to catch. A silent no-op is exactly how the
+  # udev rule going stale presented last time — the ramp kept reading fine,
+  # only the write was denied, and the module just looked dead.
+  if [ ! -w "$dir/brightness" ]; then
+    msg="$dir/brightness not writable — is 70-backlight-video.rules applied?"
+    printf '%s: %s\n' "${0##*/}" "$msg" >&2
+    notify-send 'Brightness' "$msg" 2>/dev/null || true
+    exit 1
+  fi
+
+  ceiling=$(effective_ceiling "$dir")
+  curr=$(cat -- "$dir/brightness")
+  step=$((ceiling * STEP_PCT / 100))
+
+  case "$1" in
+    up) next=$((curr + step)) ;;
+    down) next=$((curr - step)) ;;
+  esac
+
+  # Clamping down from above the ceiling is deliberate: it recovers a panel some
+  # other writer already pushed into the wrapped tail. No low clamp is needed —
+  # the kernel rescales the 0..max input into the panel's min..max range, so a
+  # written 0 lands at min_input_signal, which is dim but lit.
+  if [ "$next" -gt "$ceiling" ]; then next=$ceiling; fi
+  if [ "$next" -lt 0 ]; then next=0; fi
+
+  printf '%d\n' "$next" >"$dir/brightness"
+}
+
+main "$@"

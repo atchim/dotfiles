@@ -108,6 +108,21 @@ server — and from PulseAudio proper, which is not installed. See
 _Avoid_: PulseAudio (uninstalled; pipewire-pulse only speaks its protocol),
 audio server
 
+**Brightness**:
+The laptop panel's backlight level, expressed as a percentage of the
+**Brightness ceiling**. Only the **Laptop output** has one — external
+monitors are not backlight devices.
+_Avoid_: actual_brightness (the kernel's readback, on a different
+nonlinear curve), backlight level, PWM duty
+
+**Brightness ceiling**:
+The highest backlight setpoint this panel accepts without wrapping its PWM
+register, and therefore the repo's 100%. Lower than the `max_brightness`
+the kernel advertises. It is a property of panel plus kernel, not of the
+device, so it outlives the boot profile renaming that device.
+_Avoid_: max_brightness (the advertised maximum, whose top values blank
+the panel), full brightness
+
 **Capture mode**:
 How much of the desktop the `screenshot` helper grabs. **focused** is the
 focused monitor's rectangle; **root** is every connected output (the whole
@@ -141,6 +156,13 @@ _Avoid_: tap-to-click (libinput's count-based feature), soft click
   holds a window.
 - A **root** capture spans the whole **Topology**; a **focused** capture
   covers one monitor of it.
+- **Brightness** is written by `polybar-backlight` and reported by
+  `polybar-notify`; both divide by the **Brightness ceiling**, so the
+  scroll and the readout cannot drift apart.
+- The **Brightness ceiling** is a constant, not a **Hardware probe**
+  result — it cannot be read from `/sys` at all, only measured. That is a
+  deliberate exception to the rule that hardware facts are probed (see
+  `docs/adr/0007-*.md`).
 
 ## Example dialogue
 

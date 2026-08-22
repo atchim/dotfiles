@@ -19,7 +19,11 @@ main() {
   case "${1-}" in
     backlight)
       b=$(cat -- "/sys/class/backlight/${BACKLIGHT-}/brightness" 2>/dev/null || true)
-      m=$(cat -- "/sys/class/backlight/${BACKLIGHT-}/max_brightness" 2>/dev/null || true)
+      # Not max_brightness: on this panel its top values wrap the PWM register,
+      # so polybar-backlight clamps below it and that clamp is what 100% means
+      # here (the Brightness ceiling — see repo-root CONTEXT.md). Asking the
+      # script that owns the number keeps one copy of it.
+      m=$(polybar-backlight ceiling 2>/dev/null || true)
       if [ "$b" != "" ] && [ "$m" != "" ] && [ "$m" -gt 0 ]; then
         notify-send 'Brightness' "$((b * 100 / m))%"
       else

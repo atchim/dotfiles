@@ -29,6 +29,11 @@ Helper scripts at `~/.local/bin/`:
   microchip glyph for the polybar cpu module.
 - `polybar-notify` — backs every status module's `click-left`; pops a
   `notify-send` bubble with the precise reading.
+- `polybar-backlight` — backs the backlight module's `scroll-up`/`scroll-down`;
+  steps panel brightness, clamped below the value at which amdgpu's advertised
+  range wraps the PWM register and blanks the display. Its `ceiling`
+  subcommand publishes that clamp, so `polybar-notify` reports percentages on
+  the same scale the scroll writes on. See `docs/adr/0007-*.md`.
 - `screenshot` — maim wrapper; captures the focused monitor (resolved
   WM-agnostically via xdotool + xrandr), the whole root, or a region, and
   routes it to a PNG or the clipboard. Bound in sxhkd; see _Screenshot_ below.
